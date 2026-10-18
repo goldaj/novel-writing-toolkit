@@ -7,8 +7,8 @@ import tempfile
 from pathlib import Path
 
 
-TARGET = Path(r"C:\Users\golda\Desktop\resurrectes\resurrectes_version_codex.txt")
-WORK_ROOT = Path(r"C:\Users\golda\Documents\Résurrectés\manuscript_work")
+TARGET = Path(r"./manuscript.txt")
+WORK_ROOT = Path(r"./manuscript_work")
 DRAFT_DIR = WORK_ROOT / "draft"
 
 SECTION_FILES = [

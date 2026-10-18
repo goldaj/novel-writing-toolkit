@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 DEFAULT_TARGET = Path(
-    r"C:\Users\golda\Desktop\resurrectes\resurrectes_version_codex.txt"
+    r"./manuscript.txt"
 )
 
 WORD_RE = re.compile(

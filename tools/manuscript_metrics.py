@@ -129,7 +129,7 @@ def main() -> None:
         nargs="?",
         type=Path,
         default=Path(
-            r"C:\Users\golda\Desktop\resurrectes\resurrectes_version_codex.txt"
+            r"./manuscript.txt"
         ),
     )
     parser.add_argument("--json", action="store_true", help="Sortie JSON compacte.")
