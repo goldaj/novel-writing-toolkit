@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.docx
+*.pdf
+manuscript.txt
+manuscript_work/
+sources_text/
+sources_extracted/
