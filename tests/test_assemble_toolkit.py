@@ -40,7 +40,7 @@ class ManuscriptToolkitTests(unittest.TestCase):
             draft.mkdir()
             for name, heading in [('prologue.txt','PROLOGUE'),('chapter_01.txt','CHAPITRE 1'),
                                   ('chapter_02.txt','CHAPITRE 2'),('epilogue.txt','ÉPILOGUE')]:
-                (draft / name).write_text(heading+'\\n\\nUne scène.\\n',encoding='utf-8')
+                (draft / name).write_text(heading+'\n\nUne scène.\n',encoding='utf-8')
             files = discover_sections(draft)
             self.assertEqual(len(files),4)
             output = root / 'new-novel.txt'
