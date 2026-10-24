@@ -68,9 +68,12 @@ def main() -> None:
         default=100_000,
         help="Refuse assembly if the manuscript is shorter than this lexical word count.",
     )
+    parser.add_argument("--draft-dir", type=Path, default=DRAFT_DIR)
+    parser.add_argument("--output", type=Path, default=TARGET)
+    parser.add_argument("--manifest", type=Path, default=WORK_ROOT / "assembly_manifest.txt")
     args = parser.parse_args()
 
-    missing = [name for name in SECTION_FILES if not (DRAFT_DIR / name).exists()]
+    missing = [name for name in SECTION_FILES if not (args.draft_dir / name).exists()]
     if missing:
         raise FileNotFoundError("Missing manuscript sections: " + ", ".join(missing))
 
@@ -79,7 +82,7 @@ def main() -> None:
     for index, (name, expected) in enumerate(
         zip(SECTION_FILES, EXPECTED_HEADINGS, strict=True), start=1
     ):
-        path = DRAFT_DIR / name
+        path = args.draft_dir / name
         text = path.read_text(encoding="utf-8-sig").replace("\r\n", "\n").strip()
         first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
         if not first_line.startswith(expected):
@@ -109,23 +112,24 @@ def main() -> None:
             f"Expected {len(SECTION_FILES)} main headings, found {len(headings)}: {headings}"
         )
 
-    TARGET.parent.mkdir(parents=True, exist_ok=True)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         mode="w",
         encoding="utf-8",
         newline="\n",
-        dir=TARGET.parent,
-        prefix=TARGET.stem + "_",
+        dir=args.output.parent,
+        prefix=args.output.stem + "_",
         suffix=".tmp",
         delete=False,
     ) as handle:
         handle.write(manuscript)
         temp_path = Path(handle.name)
-    os.replace(temp_path, TARGET)
+    os.replace(temp_path, args.output)
 
     manifest = "\n".join(manifest_lines)
-    manifest += f"\nTOTAL\tresurrectes_version_codex.txt\t{total_words}\n"
-    (WORK_ROOT / "assembly_manifest.txt").write_text(
+    manifest += f"\nTOTAL\t{args.output.name}\t{total_words}\n"
+    args.manifest.parent.mkdir(parents=True, exist_ok=True)
+    args.manifest.write_text(
         manifest,
         encoding="utf-8",
         newline="\n",
@@ -133,7 +137,7 @@ def main() -> None:
 
     print(f"Assembled {len(sections)} sections")
     print(f"Lexical words: {total_words}")
-    print(f"Target: {TARGET}")
+    print(f"Target: {args.output}")
 
 
 if __name__ == "__main__":
