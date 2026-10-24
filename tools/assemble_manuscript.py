@@ -54,6 +54,29 @@ WORD_RE = re.compile(
 )
 
 
+def discover_sections(draft_dir: Path) -> list[tuple[str, str]]:
+    """Ordre du livre, en fonction des chapitres présents, pas d'un canon fixe."""
+    found = []
+    if (draft_dir / "prologue.txt").exists():
+        found.append(("prologue.txt", "PROLOGUE"))
+    chapters = []
+    for path in draft_dir.glob("chapter_*.txt"):
+        match = re.fullmatch(r"chapter_(\\d+)\\.txt", path.name)
+        if not match:
+            raise ValueError(f"Nom de chapitre invalide: {path.name}")
+        chapters.append((int(match.group(1)), path.name))
+    chapters.sort()
+    if not chapters:
+        raise ValueError("Aucun chapitre chapter_XX.txt trouvé")
+    numbers = [number for number, _ in chapters]
+    if numbers != list(range(1, len(numbers) + 1)):
+        raise ValueError(f"Chapitres manquants ou dupliqués: {numbers}")
+    found.extend((name, f"CHAPITRE {number}") for number, name in chapters)
+    if (draft_dir / "epilogue.txt").exists():
+        found.append(("epilogue.txt", "ÉPILOGUE"))
+    return found
+
+
 def lexical_words(text: str) -> int:
     return len(WORD_RE.findall(text))
 
@@ -69,18 +92,21 @@ def main() -> None:
         help="Refuse assembly if the manuscript is shorter than this lexical word count.",
     )
     parser.add_argument("--draft-dir", type=Path, default=DRAFT_DIR)
+    parser.add_argument("--discover", action="store_true", help="Assembler tous les chapitres numérotés disponibles")
     parser.add_argument("--output", type=Path, default=TARGET)
     parser.add_argument("--manifest", type=Path, default=WORK_ROOT / "assembly_manifest.txt")
     args = parser.parse_args()
 
-    missing = [name for name in SECTION_FILES if not (args.draft_dir / name).exists()]
+    sections_to_build = (discover_sections(args.draft_dir) if args.discover else
+                         list(zip(SECTION_FILES, EXPECTED_HEADINGS, strict=True)))
+    missing = [name for name, _ in sections_to_build if not (args.draft_dir / name).exists()]
     if missing:
         raise FileNotFoundError("Missing manuscript sections: " + ", ".join(missing))
 
     sections: list[str] = []
     manifest_lines: list[str] = []
     for index, (name, expected) in enumerate(
-        zip(SECTION_FILES, EXPECTED_HEADINGS, strict=True), start=1
+        sections_to_build, start=1
     ):
         path = args.draft_dir / name
         text = path.read_text(encoding="utf-8-sig").replace("\r\n", "\n").strip()
@@ -107,9 +133,9 @@ def main() -> None:
         for line in manuscript.splitlines()
         if re.fullmatch(r"(?:PROLOGUE|ÉPILOGUE|CHAPITRE \d+)(?:\s+—.*)?", line.strip())
     ]
-    if len(headings) != len(SECTION_FILES):
+    if len(headings) != len(sections_to_build):
         raise ValueError(
-            f"Expected {len(SECTION_FILES)} main headings, found {len(headings)}: {headings}"
+            f"Expected {len(sections_to_build)} main headings, found {len(headings)}: {headings}"
         )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
