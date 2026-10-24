@@ -61,7 +61,7 @@ def discover_sections(draft_dir: Path) -> list[tuple[str, str]]:
         found.append(("prologue.txt", "PROLOGUE"))
     chapters = []
     for path in draft_dir.glob("chapter_*.txt"):
-        match = re.fullmatch(r"chapter_(\\d+)\\.txt", path.name)
+        match = re.fullmatch(r"chapter_(\d+)\.txt", path.name)
         if not match:
             raise ValueError(f"Nom de chapitre invalide: {path.name}")
         chapters.append((int(match.group(1)), path.name))
