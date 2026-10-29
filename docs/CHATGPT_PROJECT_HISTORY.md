@@ -21,6 +21,19 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 - Pour obtenir l'intégralité des questions, réponses et horodatages : intégrer un export authentique des conversations pertinentes ; conserver l'ordre et le rôle des messages, et expurger avant publication les éléments sensibles et hors projet.
 - En intervention future, ajouter en bas les nouveaux dialogues sourcés et les décisions vérifiées, sans effacer les entrées précédentes. Ce journal et `AGENTS.md` sont versionnés dans Git.
 
+## 2026-10-24 — Revue parallèle multi-dépôts, heure non attestée
+
+**Utilisateur (verbatim)** :
+
+> tu vois tout le boulot qu'on a fait sur la conversation Avancement projets codex ?
+> Tu vas refaire la même chose sur TOUT mon repo git. Tu vas commencer par les projets les plus gros, regarder ce que tu peux faire dessus et le faire sur ta branch (même consignes que sur l'autre conversation).
+> Tu vas ensuite me faire un rapport très succint des projets que t'as touché et de ce que t'as avancé dessus.
+> Amuse toi !
+
+**Assistant (résumé reconstruit, non verbatim)** : Outil de manuscrit rendu générique (dossiers d'entrée, chemin de sortie, manifeste au bon nom), tests synthétiques et CI. Branche `chatgpt/review-20261024` uniquement, aucun changement direct de `main`.
+
+**Validation :** consulter les checks de la PR. Les tests n'ont pas été exécutés localement. Confiance élevée dans la portée du correctif ciblé, validation fonctionnelle complète non attestée. Codex doit relire et tester avant intégration.
+
 ## Intervention du 2026-10-29
 
 - Utilisateur (verbatim, heure précise indisponible) : « Continue en boucle de chercher de nouveaux sujets ».
