@@ -26,3 +26,12 @@ Le `tools/manuscript_pipeline.py` est la voie générique recommandée pour cré
 - La CLI refuse les chemins qui sortent du dossier du manuscrit et l'écrasement silencieux de sections.
 - Ne pas prétendre qu'une IA écrit ou corrige les textes : il s'agit d'un assembleur et de contrôles déterministes, sans appel réseau.
 - Priorités de reprise : interface locale, profils éditoriaux, migration progressive des utilitaires historiques ; voir `docs/GENERIC_WORKFLOW.md`.
+
+## Branche de l'export EPUB 3 (29 octobre 2026)
+
+- Base : `feat/generic-manuscript-workflow-20261029` (PR #2), branche : `feat/epub-export-manuscript-20261029`. PR empilée, pas de fusion avant la base. Vérifier aussi la PR #1 et la CI avant reprise.
+- `tools/manuscript_pipeline.py epub <projet>` : passe impérativement par l'inspection des sections, utilise les garde-fous `safe_output` et construit un EPUB sans dépendance ni réseau.
+- `tools/epub_export.py` : ZIP EPUB 3, `mimetype` non compressé en premier, OPF/nav XHTML, paragraphes et sous-titres simples, échappement XML et écriture atomique.
+- `tests/test_epub_export.py` : archive complète, table des matières, `spine`, Unicode et XML, `--force`, chemins interdits et QA bloquante.
+- Lancement : `python -m unittest discover -s tests -v` ; ouvrir un export **synthétique** sur Calibre et EPUBCheck pour contrôle externe. CI non synonyme de compatibilité liseuse.
+- Lire `docs/EPUB_EXPORT.md`, respecter la confidentialité absolue des manuscrits et ne jamais committer des exports réels ni convertir des projets privés de l'utilisateur dans cette branche.
