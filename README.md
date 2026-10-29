@@ -42,3 +42,9 @@ Ce projet démontre la conception d'un workflow, l'automatisation de tâches ré
 Lancer `python tools/manuscript_pipeline.py init mon-roman --chapters 5`, remplir les fichiers `mon-roman/sections/` puis exécuter `python tools/manuscript_pipeline.py check mon-roman` et `python tools/manuscript_pipeline.py build mon-roman`. L'assemblage vérifie les en-têtes, la longueur et les règles de qualité sans exposer les textes. Les rapports JSON permettent une intégration ultérieure dans une interface. Les fichiers sources ne sont jamais écrasés par le build. Les anciens outils restent disponibles sans modification.
 
 **[Guide complet d'utilisation et de reprise pour Codex](docs/GENERIC_WORKFLOW.md).** Tests : `python -m unittest discover -s tests -v`. Conserver les vrais manuscrits hors du dépôt public.
+
+## Export livre numérique EPUB 3 (branche du 29 octobre 2026)
+
+La nouvelle commande `python tools/manuscript_pipeline.py epub mon-roman --author "Nom d'auteur"` produit `mon-roman/manuscript.epub` après contrôle qualité des sections. Format EPUB 3 reflowable avec table des matières, chapitres XHTML et métadonnées. Python standard uniquement, aucune transmission du manuscrit. Refus d'écrasement sans `--force`, sortie confinée au projet.
+
+**[Guide EPUB, tests et limites](docs/EPUB_EXPORT.md)**. Cette branche est empilée sur la PR #2 du workflow générique ; aucun des scripts historiques ni des textes privés n'a été modifié. Tests XML/ZIP automatiques, validation par liseuse/EPUBCheck à faire avant diffusion.
