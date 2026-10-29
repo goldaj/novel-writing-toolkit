@@ -21,4 +21,11 @@ jobs:
       - name: Python tests (synthetic, zero external dependencies)
         run: python -m unittest discover -s tests -v
       - name: Check CLI usage
-        run: python tools/manuscript_pipeline.py --help
+        run: |
+          python tools/manuscript_pipeline.py --help
+          python tools/manuscript_pipeline.py epub --help
+      - name: End-to-end EPUB smoke with synthetic manuscript
+        run: |
+          python tools/manuscript_pipeline.py init /tmp/demo-novel --chapters 3 --title "Histoire fictive"
+          python tools/manuscript_pipeline.py epub /tmp/demo-novel --author "Auteur fictif"
+          python -c "import zipfile; z=zipfile.ZipFile('/tmp/demo-novel/manuscript.epub'); assert z.read('mimetype') == b'application/epub+zip'; assert z.testzip() is None"

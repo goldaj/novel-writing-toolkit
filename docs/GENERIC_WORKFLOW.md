@@ -60,3 +60,9 @@ Priorités suivantes :
 5. Unifier les rapports JSON des outils actuels et concevoir une comparaison entre deux versions de manuscrit.
 
 Développé sur `feat/generic-manuscript-workflow-20261029` le 2026-10-29, sans modification des textes littéraires.
+
+## Sortie EPUB 3 (branche de développement du 29 octobre 2026)
+
+La commande `python tools/manuscript_pipeline.py epub mon-roman --author "Nom d'auteur"` génère un fichier EPUB reflowable avec chapitre par section et table des matières à partir du projet déjà contrôlé. Par défaut : `mon-roman/manuscript.epub`. L'export refuse un projet non conforme, les chemins hors dossier et l'écrasement sans `--force`. Module sans réseau ni dépendances externes.
+
+Guide détaillé, limites du Markdown et vérification XML/ZIP : `docs/EPUB_EXPORT.md`. La branche EPUB est **empilée** sur le workflow générique. Ne jamais ajouter les fichiers EPUB ou manuscrits privés aux dépôts publics.

@@ -218,14 +218,20 @@ def cli(argv: list[str] | None = None) -> int:
     init.add_argument("root", type=Path)
     init.add_argument("--chapters", type=int, default=3)
     init.add_argument("--title", default="Mon manuscrit")
-    for command in ("check", "build"):
-        p = sub.add_parser(command, help="Inspect sections" if command == "check" else "Assemble and verify manuscript")
+    for command in ("check", "build", "epub"):
+        description = {"check": "Inspect sections", "build": "Assemble manuscript text",
+                       "epub": "Export validated chapters to reflowable EPUB 3"}[command]
+        p = sub.add_parser(command, help=description)
         p.add_argument("root", type=Path)
         p.add_argument("--json", action="store_true", help="Print structured report to stdout")
-        if command == "build":
-            p.add_argument("--output", default="manuscript.txt")
-            p.add_argument("--report", default="manuscript-report.json")
+        if command in ("build", "epub"):
+            p.add_argument("--output", default="manuscript.txt" if command == "build" else "manuscript.epub")
             p.add_argument("--force", action="store_true", help="Allow replacing existing output files")
+        if command == "build":
+            p.add_argument("--report", default="manuscript-report.json")
+        if command == "epub":
+            p.add_argument("--author", default="", help="Optional author metadata")
+            p.add_argument("--language", default="fr", help="BCP47 language tag, default fr")
     args = parser.parse_args(argv)
     try:
         root = args.root.resolve()
@@ -234,6 +240,19 @@ def cli(argv: list[str] | None = None) -> int:
             print("Created project: " + str(root))
             return 0
         report, manuscript, sources = inspect(root)
+        if args.command == "epub" and report["passed"]:
+            from epub_export import render_epub
+            output = safe_output(root, args.output, sources, args.force)
+            project, paths = load_project(root)
+            chapters = []
+            for chapter_path, heading in paths:
+                lines = read_utf8(chapter_path).splitlines()
+                first = next((i for i, line in enumerate(lines) if line.strip()), None)
+                if first is None:
+                    raise ProjectError("Empty section cannot be exported: " + heading)
+                chapters.append((heading, "\n".join(lines[first + 1:])))
+            render_epub(output, project["title"], chapters,
+                        author=args.author, language=args.language)
         if args.command == "build" and report["passed"]:
             output = safe_output(root, args.output, sources, args.force)
             report_path = safe_output(root, args.report, sources, args.force)
@@ -254,8 +273,10 @@ def cli(argv: list[str] | None = None) -> int:
             if args.command == "build" and report["passed"]:
                 print("Saved manuscript: " + str(output))
                 print("Saved report: " + str(report_path))
+            if args.command == "epub" and report["passed"]:
+                print("Saved EPUB 3: " + str(output))
         return 0 if report["passed"] else 1
-    except (ProjectError, OSError, UnicodeError) as exc:
+    except (ValueError, OSError, UnicodeError) as exc:
         print("Configuration error: " + str(exc), file=sys.stderr)
         return 2
 
