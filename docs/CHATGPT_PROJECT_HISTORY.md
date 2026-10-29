@@ -28,3 +28,11 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 - Code ajouté : `tools/manuscript_pipeline.py` ; tests : `tests/test_manuscript_pipeline.py` ; CI : `.github/workflows/python-tests.yml` ; guide : `docs/GENERIC_WORKFLOW.md`. CLI `init`, `check`, `build`, rapports QA et contrôle de sécurité des chemins.
 - Tests CI de la première itération : un test négatif incorrect a été identifié et corrigé. Exécution suivante du commit 9c10f18a6e8df574b267d0d0790828d761bc5cbd : **succès** sur GitHub Actions (https://github.com/goldaj/novel-writing-toolkit/actions/runs/40845795041). Suivre les CI des commits ultérieurs avant fusion.
 - Limitations : pas de navigation locale ni de rapport HTML, pas de migration des anciens scripts, pas de manuscrit réel testé. Aucune transcription complète des anciennes conversations n'est disponible. Voir le guide pour la passation.
+
+## Intervention 2026-10-29 — format EPUB 3 (résumé non verbatim)
+
+- Demande utilisateur : continuer en chaîne les améliorations GitHub et documenter systématiquement pour Codex. Le présent travail porte sur un nouvel export lisible pour les projets littéraires, sans utilisation des manuscrits privés.
+- Audit : branche `main`, PR #1 de revue, PR #2 `feat/generic-manuscript-workflow-20261029` et CI du parent en succès. Branche empilée `feat/epub-export-manuscript-20261029`, sans modification du workflow de base ni des anciens scripts.
+- Livraison : `tools/epub_export.py`, commande `epub` réutilisant les validations de `tools/manuscript_pipeline.py`, export EPUB 3 XML/XHTML/ZIP avec table des matières, tests synthétiques et documentation `docs/EPUB_EXPORT.md`.
+- Validation : tests et workflow intégrés ; **CI de la nouvelle branche et compatibilité réelle Calibre/liseuse/EPUBCheck à vérifier** avant d'affirmer qu'un EPUB a été qualifié sur lecteur. Aucun texte personnel ni contenu littéraire privé committé.
+- Prochaines étapes : vérifier les checks, tester l'EPUB sur une liseuse, puis ajouter styles/couverture optionnels si utile. Préserver la confidentialité et ne pas fusionner les PR empilées dans le désordre.
