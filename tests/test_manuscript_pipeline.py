@@ -46,10 +46,7 @@ class ManuscriptWorkflowTests(unittest.TestCase):
 
     def test_mismatched_heading_blocks_output(self):
         (self.root / "sections" / "chapter_02.txt").write_text(
-            "Deuxième chapitre\
-\
-Texte.\
-", encoding="utf-8"
+            "Deuxième chapitre\n\nTexte.\n", encoding="utf-8"
         )
         self.assertEqual(pipeline.cli(["build", str(self.root)]), 1)
         self.assertFalse((self.root / "manuscript.txt").exists())
