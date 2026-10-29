@@ -33,3 +33,11 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 **Assistant (résumé reconstruit, non verbatim)** : Outil de manuscrit rendu générique (dossiers d'entrée, chemin de sortie, manifeste au bon nom), tests synthétiques et CI. Branche `chatgpt/review-20261024` uniquement, aucun changement direct de `main`.
 
 **Validation :** consulter les checks de la PR. Les tests n'ont pas été exécutés localement. Confiance élevée dans la portée du correctif ciblé, validation fonctionnelle complète non attestée. Codex doit relire et tester avant intégration.
+
+## Intervention du 2026-10-29
+
+- Utilisateur (verbatim, heure précise indisponible) : « Continue en boucle de chercher de nouveaux sujets ».
+- Assistant (résumé reconstruit, non verbatim) : sélection du dépôt `novel-writing-toolkit` après inventaire de plusieurs projets ; décision d'ajouter une expérience générique d'assemblage et QA sans importer les manuscrits privés et sans casser les utilitaires historiques.
+- Code ajouté : `tools/manuscript_pipeline.py` ; tests : `tests/test_manuscript_pipeline.py` ; CI : `.github/workflows/python-tests.yml` ; guide : `docs/GENERIC_WORKFLOW.md`. CLI `init`, `check`, `build`, rapports QA et contrôle de sécurité des chemins.
+- Tests CI de la première itération : un test négatif incorrect a été identifié et corrigé. Exécution suivante du commit 9c10f18a6e8df574b267d0d0790828d761bc5cbd : **succès** sur GitHub Actions (https://github.com/goldaj/novel-writing-toolkit/actions/runs/40845795041). Suivre les CI des commits ultérieurs avant fusion.
+- Limitations : pas de navigation locale ni de rapport HTML, pas de migration des anciens scripts, pas de manuscrit réel testé. Aucune transcription complète des anciennes conversations n'est disponible. Voir le guide pour la passation.

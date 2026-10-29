@@ -16,3 +16,13 @@
 - Format : date ISO et fuseau si connus, rôle `Utilisateur` ou `Assistant`, mention `verbatim` seulement pour un texte exact. Sinon `résumé reconstruit, non verbatim`. Ne pas inventer d'heure ni de citation.
 - Si l'historique intégral n'est pas disponible, le signaler et demander un export réel plutôt que fabriquer une transcription. Préserver les exports existants sans les réécrire.
 - Exclure secrets, identifiants, données personnelles et contenus non destinés à la publication. Le niveau de visibilité de ce dépôt s'applique aussi aux documents ajoutés.
+
+## Nouvelle architecture (29/10/2026)
+
+Le `tools/manuscript_pipeline.py` est la voie générique recommandée pour créer, valider et assembler les nouveaux projets. Lire `docs/GENERIC_WORKFLOW.md` avant toute modification. Les anciens scripts restent liés à leur projet d'origine, ne pas les supprimer ni les modifier en masse.
+
+- Tests synthétiques : `python -m unittest discover -s tests -v` (Python 3.10 et 3.12 via CI).
+- Préserver les manuscrits, rapports et dossiers de travail personnels *hors* du dépôt public.
+- La CLI refuse les chemins qui sortent du dossier du manuscrit et l'écrasement silencieux de sections.
+- Ne pas prétendre qu'une IA écrit ou corrige les textes : il s'agit d'un assembleur et de contrôles déterministes, sans appel réseau.
+- Priorités de reprise : interface locale, profils éditoriaux, migration progressive des utilitaires historiques ; voir `docs/GENERIC_WORKFLOW.md`.
