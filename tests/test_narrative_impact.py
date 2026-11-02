@@ -75,6 +75,24 @@ class NarrativeImpactTests(unittest.TestCase):
         self.assertTrue(report["changes"][0]["distant_candidates"])
         self.assertIn("not a proof", report["disclaimer"])
 
+    def test_distant_echo_not_lost_behind_early_repeated_mentions(self):
+        # The heroine's name is repeated throughout the book: the last chapter
+        # must still appear in the shortlist of echoes.
+        for i in range(10):
+            self.write(self.new, 2, "Léo attend. " * (i + 1))
+        paragraph = ni.Paragraph("sections/chapter_01.txt", 2, 3, "Léo était grand.")
+        later = [
+            ni.Paragraph(f"sections/chapter_{i:02}.txt", 2, 3,
+                         "Léo revient dans cette scène.")
+            for i in range(2, 42)
+        ]
+        changed = {"before":[{"excerpt":"Léo était petit."}],
+                   "after":[{"chapter":"sections/chapter_01.txt","paragraph":2,
+                             "excerpt":"Léo était grand."}]}
+        matches = ni.candidates(changed, [paragraph, *later], max_hits=8)
+        self.assertTrue(any(p["chapter"]=="sections/chapter_41.txt" for p in matches))
+        self.assertEqual(len(matches), 8)
+
     def test_deletion_and_new_chapter_are_reported(self):
         self.write(self.new, 2, "Toute l'école était silencieuse.")
         a = ni.analyze(self.old, self.new)

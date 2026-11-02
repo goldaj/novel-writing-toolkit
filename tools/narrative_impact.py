@@ -118,8 +118,21 @@ def candidates(change: dict, after: list[Paragraph], aliases: list[str] | None =
         if score < 2 and not alias_set:
             continue
         hits.append((score, p))
-    hits.sort(key=lambda item: (-item[0], item[1].chapter, item[1].number))
-    return [{"relevance_score": score, **p.ref()} for score, p in hits[:max_hits]]
+    # Mix high relevance with late-story coverage: a major consequence can occur
+    # dozens of chapters later even when a name also appears in every early scene.
+    positions = {(p.chapter, p.number): index for index, p in enumerate(after)}
+    hits.sort(key=lambda item: (-item[0], positions[(item[1].chapter, item[1].number)]))
+    focus = max(1, (max_hits * 2) // 3)
+    selected = hits[:focus]
+    picked = {(p.chapter, p.number) for _, p in selected}
+    for score, p in sorted(hits, key=lambda item: positions[
+            (item[1].chapter, item[1].number)], reverse=True):
+        if len(selected) >= max_hits:
+            break
+        if (p.chapter, p.number) not in picked:
+            selected.append((score, p))
+            picked.add((p.chapter, p.number))
+    return [{"relevance_score": score, **p.ref()} for score, p in selected]
 
 
 def dossier(raw: dict) -> dict:
