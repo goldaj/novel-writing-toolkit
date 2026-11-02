@@ -55,3 +55,9 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 **Utilisateur (verbatim, extraits de la présente conversation ; heure exacte non attestée) :** « le personnage est petit et mal traité, sur la prochaine version il devient grand. Est-ce que c'est encore raisonnable qu'il soit maltraité ? Est-ce qu'une justification a remplacé celle qui a été supprimée ? Par exemple, peut être qu'il est maintenant décrit comme chétif. » Et : « ses yeux passent de vert à bleu -> on n'exploite pas cette information, donc aucun impact. » Demande de repérer aussi les effets apparaissant plusieurs dizaines ou centaines de pages plus tard.
 
 **Assistant (résumé non verbatim) :** implémentation sur branche isolée d'un moteur d'examen des révisions, recherche d'échos éloignés, graphes de causalité à justifications alternatives et relecture IA optionnelle avec preuve de source. Protocole synthétique et tests, sans texte privé. Les résultats sémantiques et la complétude d'une analyse de roman réel ne sont **pas** garantis ; aucun appel à l'API réelle n'a été validé par la CI.
+
+## 2026-11-02 — Mémoire narrative et recherche IA locale
+
+**Utilisateur (verbatim, heure exacte non attestée)** : « 1/ rajoute toute cette analyse dans le projet de toolkit. 2/ Transforme l'étude narrative que t'as fait sur résurrectés pour qu'elle rentre dans le format attendu par le toolkit ».
+
+**Assistant (résumé reconstruit, non verbatim)** : documentation comparative de moteurs locaux et extraction sourcée, proposition Ollama + LangExtract à tester, ajout d'un adaptateur standard-library d'événements et liens causaux vers le format `dossier` existant. Aucune donnée du roman privé copiée dans ce dépôt. Résurrectés est converti et conservé dans son propre dépôt privé ; aucune IA locale intégrée lors de cette étape.
