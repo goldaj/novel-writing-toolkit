@@ -39,3 +39,7 @@ Le `tools/manuscript_pipeline.py` est la voie générique recommandée pour cré
 ## Narrative Impact (2026-11-02)
 
 Lire `docs/NARRATIVE_IMPACT.md`. L'objectif est la **cohérence causale**, pas un simple diff. Ne pas confondre corrélation lexicale, lien déclaré par l'auteur et hypothèse IA. Le consentement `--allow-upload` est obligatoire avant tout transfert de manuscrit via API ; ne jamais introduire clé, corpus privé ou rapport littéraire dans Git public. Les tests IA utilisent des doubles et ne prouvent pas l'exactitude d'une interprétation littéraire. Les vrais manuscrits ne doivent pas être corrigés automatiquement sur la seule base du rapport.
+
+## Étude IA locale et convertisseur de mémoire (2026-11-02)
+
+Lire `docs/LOCAL_NARRATIVE_AI_RESEARCH.md` avant d'ajouter une IA ou modifier `tools/chronology_to_dossier.py`. **Ollama + LangExtract est une hypothèse à benchmarker, pas une intégration livrée**. Distinguer mémoire déclarative v1, source textuelle, événements, connaissances individuelles et causalité. Les données privées de Résurrectés restent exclusivement dans son dépôt privé. Tester l'adaptateur avec `tests/test_chronology_to_dossier.py`, fichiers synthétiques seulement. Ne pas prétendre qu'une baseline avec valeurs `before=after` détecte les changements sémantiques. Aucune transmission réseau ou intégration de modèle sans accord du propriétaire.

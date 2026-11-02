@@ -54,3 +54,7 @@ La nouvelle commande `python tools/manuscript_pipeline.py epub mon-roman --autho
 **Narrative Impact** recherche les conséquences d'un changement plusieurs chapitres plus loin. Le moteur local (`tools/narrative_impact.py`) combine modifications de paragraphes, recherche transversale et dossier facultatif de faits/règles de causalité. Un module IA séparé (`tools/narrative_impact_ai.py`) propose des hypothèses sémantiques avec citations contrôlées, mais **n'envoie des extraits de manuscrit à OpenAI que sous `--allow-upload` avec une clé API explicite**. Les résultats restent soumis à la relecture humaine.
 
 [Guide de démarrage, exemples fictifs et limites](docs/NARRATIVE_IMPACT.md). Tests unitaires et CI Python 3.10/3.12, zéro contenu littéraire personnel committé.
+
+## Vers une mémoire narrative construite par IA locale (novembre 2026)
+
+[Étude d'architecture et comparaison des solutions](docs/LOCAL_NARRATIVE_AI_RESEARCH.md) : Ollama + LangExtract privilégiés, LM Studio en alternative, modèles Gemma 4/Qwen 3.5/Ministral à évaluer, extraction sourcée et mémoire chronologique interchapitres. **Aucune IA locale n'est encore intégrée.** Le convertisseur hors ligne [chronology_to_dossier.py](tools/chronology_to_dossier.py) transforme une mémoire d'événements + relations annotées en dossier causal attendu par `narrative_impact.py`; tests synthétiques sans manuscrit privé.

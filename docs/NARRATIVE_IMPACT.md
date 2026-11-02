@@ -84,3 +84,7 @@ Documentation officielle du format des réponses : https://platform.openai.com/d
 6. Interface de validation « accepté / corrigé / volontaire » avec export des décisions vers une bible de continuité.
 
 **Pas de réécriture automatique d'un roman à partir d'une conclusion non vérifiée.**
+
+## Pont pour une mémoire chronologique existante
+
+Le [convertisseur de mémoires chronologiques](../tools/chronology_to_dossier.py) accepte un index d'événements sourcé et un fichier séparé décrivant **explicitement les dépendances causales**. Il en déduit le fichier `--dossier` compatible avec ce module. Il est **hors ligne**, ne fait aucune extraction IA et ne garantit aucune cohérence sémantique. Voir [l'étude sur la future IA locale](LOCAL_NARRATIVE_AI_RESEARCH.md), les limites du format baseline et les exemples de commande. Les fichiers de mémoire d'un roman privé doivent rester dans leur dépôt privé.
