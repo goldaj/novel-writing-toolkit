@@ -39,6 +39,10 @@ class NarrativeAITests(unittest.TestCase):
                  "old_quote":"yeux étaient verts","new_quote":"yeux étaient bleus",
                  "category":"style_or_surface","search_terms":["yeux"]},
             ]}
+        if "yeux" in payload["claim"]["before"]:
+            return {"verdict":"no_detectable_narrative_impact",
+                    "explanation":"La couleur des yeux ne motive aucune scène citée.",
+                    "confidence":"low","references":[],"next_checks":[]}
         return {
             "verdict":"alternative_justification_found",
             "explanation":"La chétivité peut rester une vulnérabilité malgré la taille.",
@@ -69,7 +73,8 @@ class NarrativeAITests(unittest.TestCase):
         self.assertEqual(report["ai"]["changes_processed"],1)
         self.assertEqual(len(report["ai"]["assessments"]),2)
         self.assertTrue(all(item["review_required"] for item in report["ai"]["assessments"]))
-        self.assertTrue(all(item["verdict"]=="alternative_justification_found" for item in report["ai"]["assessments"]))
+        self.assertEqual([i["verdict"] for i in report["ai"]["assessments"]],
+                         ["alternative_justification_found","no_detectable_narrative_impact"])
         self.assertIn("Hypothèses",ai.render_ai_html(report))
 
     def test_reject_fabricated_quotes_and_unexposed_citations(self):

@@ -160,12 +160,10 @@ def select_context(claim: dict, changed: dict, old_pages: list, new_pages: list,
     terms = [claim["subject"], claim["before"], claim["after"], *claim["search_terms"]]
     keywords = set().union(*(words(s) for s in terms))
     chapter_rank = {label: i for i, label in enumerate(new_order)}
-    exclude = {(p["chapter"], p["paragraph"]) for p in changed["after"]}
     ranked = []
     for version, pages in (("old", old_pages), ("new", new_pages)):
         for p in pages:
-            if version == "new" and (p.chapter, p.number) in exclude:
-                continue
+            # The updated scene itself may contain a replacement justification.
             matching = words(p.text) & keywords
             if not matching:
                 continue
@@ -222,7 +220,9 @@ def assess(old_dir: Path, new_dir: Path, model: str,
             "task": "Identify up to five factual/causal changes, not line-by-line stylistic changes. "
                     "Quote EXACT contiguous substrings of the changed paragraphs; "
                     "return [] if pure punctuation/style. Propose names and downstream search terms.",
-            "change": change,
+            "change": {**change, "before": change["before"][:8],
+                       "after": change["after"][:8]},
+            "truncated_paragraphs": max(0,len(change["before"])-8)+max(0,len(change["after"])-8),
         })
         claims, rejected_claims = safe_claims(change, raw)
         for claim in claims:
