@@ -11,7 +11,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from narrative_impact import ProjectError, analyze, candidates, paragraphs, render_html, words
+from narrative_impact import ProjectError, analyze, paragraphs, render_html, words
+from manuscript_pipeline import load_project
 
 SCHEMA_CLAIMS = {
     "type": "object",
@@ -186,7 +187,7 @@ def validate_references(raw: dict, old_pages: list, new_pages: list,
                         exposed: list[dict]) -> tuple[list[dict], int]:
     pages = {("old", p.chapter, p.number): p.text for p in old_pages}
     pages.update({("new", p.chapter, p.number): p.text for p in new_pages})
-    allowed = {(p["version"], p["chapter"], p["paragraph"]) for p in exposed}
+    allowed = {(p["version"], p["chapter"], p["paragraph"]): p["excerpt"] for p in exposed}
     found, invalid = [], 0
     refs = raw.get("references", [])
     if not isinstance(refs, list):
@@ -197,7 +198,8 @@ def validate_references(raw: dict, old_pages: list, new_pages: list,
             continue
         key = (r.get("version"), r.get("chapter"), r.get("paragraph"))
         quote = r.get("quote")
-        if key not in allowed or not isinstance(quote, str) or not quote.strip() or quote not in pages[key]:
+        if (key not in allowed or not isinstance(quote, str) or not quote.strip()
+                or quote not in allowed[key] or quote not in pages[key]):
             invalid += 1
             continue
         found.append({**r, "line": next((p["line"] for p in exposed
@@ -313,7 +315,14 @@ def cli(argv: list[str] | None = None) -> int:
         dest = [p.resolve() for p in (args.json_out, args.html_out) if p]
         if len(set(dest)) != len(dest):
             raise ProjectError("Report files must be distinct")
+        protected = {(root.resolve() / "project.json").resolve()
+                     for root in (args.old, args.new)}
+        for root in (args.old, args.new):
+            _, sources = load_project(root)
+            protected.update(path.resolve() for path, _ in sources)
         for p in dest:
+            if p in protected:
+                raise ProjectError("Report cannot replace project config or manuscript section")
             if p.exists() and (not args.force or not p.is_file()):
                 raise ProjectError("Refusing to overwrite report: " + str(p))
             if p in [args.old.resolve(), args.new.resolve()]:

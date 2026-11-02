@@ -317,7 +317,16 @@ def cli(argv: list[str] | None = None) -> int:
         destinations = [x.resolve() for x in (args.json_out, args.html_out) if x]
         if len(set(destinations)) != len(destinations):
             raise ProjectError("Report paths must differ")
+        protected = {(root.resolve() / "project.json").resolve()
+                     for root in (args.old, args.new)}
+        for root in (args.old, args.new):
+            _, sources = load_project(root)
+            protected.update(path.resolve() for path, _ in sources)
+        if args.dossier:
+            protected.add(args.dossier.resolve())
         for path in destinations:
+            if path in protected:
+                raise ProjectError("Report must not overwrite input manuscript or dossier")
             if path.exists() and (not args.force or not path.is_file()):
                 raise ProjectError("Refusing to overwrite existing report: " + str(path))
             if path.resolve() in {x.resolve() for x in (args.old, args.new, args.dossier) if x}:

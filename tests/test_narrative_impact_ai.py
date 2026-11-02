@@ -120,6 +120,19 @@ class NarrativeAITests(unittest.TestCase):
         with self.assertRaises(ai.ProjectError):
             ai.output_text({"status":"completed","output":[]})
 
+    def test_quote_not_exposed_in_context_cannot_count_as_evidence(self):
+        from narrative_impact import paragraphs
+        old, _ = paragraphs(self.old)
+        new, _ = paragraphs(self.new)
+        excerpt = "Léo s'enfuit"
+        claimed = {"references":[{"version":"new","chapter":"sections/chapter_03.txt",
+                   "paragraph":2,"quote":"brimades","role":"later_consequence"}]}
+        exposed = [{"version":"new","chapter":"sections/chapter_03.txt",
+                    "paragraph":2,"excerpt":excerpt,"line":3}]
+        valid, invalid = ai.validate_references(claimed, old, new, exposed)
+        self.assertEqual(valid, [])
+        self.assertEqual(invalid, 1)
+
     def test_cli_without_explicit_consent_never_calls_model(self):
         dest=Path(self.tmp.name)/"out.json"
         result=ai.cli([str(self.old),str(self.new),"--model","whatever",

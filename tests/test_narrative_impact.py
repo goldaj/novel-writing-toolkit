@@ -106,6 +106,14 @@ class NarrativeImpactTests(unittest.TestCase):
         with self.assertRaises(ni.ProjectError):
             ni.analyze(self.old, self.new, {"format_version": 1, "facts": [{"id":"x","before":"a","after":"b"}], "rules": [{"id":"x","because_any":[[{"fact":"x","equals":"a"}]]}]})
 
+    def test_refuse_overwriting_story_even_with_force(self):
+        chapter = self.new / "sections" / "chapter_01.txt"
+        original = chapter.read_text(encoding="utf-8")
+        result = ni.cli([str(self.old), str(self.new), "--force",
+                         "--json-out", str(chapter)])
+        self.assertEqual(result, 2)
+        self.assertEqual(chapter.read_text(encoding="utf-8"), original)
+
     def test_cli_safe_outputs_and_readable_reports(self):
         dossier_path = self.base / "causes.json"
         dossier_path.write_text(json.dumps(DOSSIER, ensure_ascii=False), encoding="utf-8")
