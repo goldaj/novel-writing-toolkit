@@ -48,3 +48,9 @@ Lancer `python tools/manuscript_pipeline.py init mon-roman --chapters 5`, rempli
 La nouvelle commande `python tools/manuscript_pipeline.py epub mon-roman --author "Nom d'auteur"` produit `mon-roman/manuscript.epub` après contrôle qualité des sections. Format EPUB 3 reflowable avec table des matières, chapitres XHTML et métadonnées. Python standard uniquement, aucune transmission du manuscrit. Refus d'écrasement sans `--force`, sortie confinée au projet.
 
 **[Guide EPUB, tests et limites](docs/EPUB_EXPORT.md)**. Cette branche est empilée sur la PR #2 du workflow générique ; aucun des scripts historiques ni des textes privés n'a été modifié. Tests XML/ZIP automatiques, validation par liseuse/EPUBCheck à faire avant diffusion.
+
+## Impact narratif des révisions (2 novembre 2026)
+
+**Narrative Impact** recherche les conséquences d'un changement plusieurs chapitres plus loin. Le moteur local (`tools/narrative_impact.py`) combine modifications de paragraphes, recherche transversale et dossier facultatif de faits/règles de causalité. Un module IA séparé (`tools/narrative_impact_ai.py`) propose des hypothèses sémantiques avec citations contrôlées, mais **n'envoie des extraits de manuscrit à OpenAI que sous `--allow-upload` avec une clé API explicite**. Les résultats restent soumis à la relecture humaine.
+
+[Guide de démarrage, exemples fictifs et limites](docs/NARRATIVE_IMPACT.md). Tests unitaires et CI Python 3.10/3.12, zéro contenu littéraire personnel committé.

@@ -49,3 +49,9 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 - Livraison : `tools/epub_export.py`, commande `epub` réutilisant les validations de `tools/manuscript_pipeline.py`, export EPUB 3 XML/XHTML/ZIP avec table des matières, tests synthétiques et documentation `docs/EPUB_EXPORT.md`.
 - Validation : tests et workflow intégrés ; **CI de la nouvelle branche et compatibilité réelle Calibre/liseuse/EPUBCheck à vérifier** avant d'affirmer qu'un EPUB a été qualifié sur lecteur. Aucun texte personnel ni contenu littéraire privé committé.
 - Prochaines étapes : vérifier les checks, tester l'EPUB sur une liseuse, puis ajouter styles/couverture optionnels si utile. Préserver la confidentialité et ne pas fusionner les PR empilées dans le désordre.
+
+## 2026-11-02 — Analyse d'impact causal d'une révision
+
+**Utilisateur (verbatim, extraits de la présente conversation ; heure exacte non attestée) :** « le personnage est petit et mal traité, sur la prochaine version il devient grand. Est-ce que c'est encore raisonnable qu'il soit maltraité ? Est-ce qu'une justification a remplacé celle qui a été supprimée ? Par exemple, peut être qu'il est maintenant décrit comme chétif. » Et : « ses yeux passent de vert à bleu -> on n'exploite pas cette information, donc aucun impact. » Demande de repérer aussi les effets apparaissant plusieurs dizaines ou centaines de pages plus tard.
+
+**Assistant (résumé non verbatim) :** implémentation sur branche isolée d'un moteur d'examen des révisions, recherche d'échos éloignés, graphes de causalité à justifications alternatives et relecture IA optionnelle avec preuve de source. Protocole synthétique et tests, sans texte privé. Les résultats sémantiques et la complétude d'une analyse de roman réel ne sont **pas** garantis ; aucun appel à l'API réelle n'a été validé par la CI.
