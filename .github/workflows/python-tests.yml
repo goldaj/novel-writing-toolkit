@@ -24,6 +24,12 @@ jobs:
         run: |
           python tools/manuscript_pipeline.py --help
           python tools/manuscript_pipeline.py epub --help
+          python tools/narrative_impact.py --help
+          python tools/narrative_impact_ai.py --help
+      - name: Fictional manuscript impact smoke
+        run: |
+          python tools/narrative_impact.py examples/narrative-impact/avant examples/narrative-impact/apres --dossier examples/narrative-impact/dossier.json --json-out /tmp/impact.json --html-out /tmp/impact.html
+          python -c "import json; x=json.load(open('/tmp/impact.json')); assert any(i['status']=='alternative_justification' for i in x['impact']); assert x['changed_blocks']==1"
       - name: End-to-end EPUB smoke with synthetic manuscript
         run: |
           python tools/manuscript_pipeline.py init /tmp/demo-novel --chapters 3 --title "Histoire fictive"

@@ -35,3 +35,7 @@ Le `tools/manuscript_pipeline.py` est la voie générique recommandée pour cré
 - `tests/test_epub_export.py` : archive complète, table des matières, `spine`, Unicode et XML, `--force`, chemins interdits et QA bloquante.
 - Lancement : `python -m unittest discover -s tests -v` ; ouvrir un export **synthétique** sur Calibre et EPUBCheck pour contrôle externe. CI non synonyme de compatibilité liseuse.
 - Lire `docs/EPUB_EXPORT.md`, respecter la confidentialité absolue des manuscrits et ne jamais committer des exports réels ni convertir des projets privés de l'utilisateur dans cette branche.
+
+## Narrative Impact (2026-11-02)
+
+Lire `docs/NARRATIVE_IMPACT.md`. L'objectif est la **cohérence causale**, pas un simple diff. Ne pas confondre corrélation lexicale, lien déclaré par l'auteur et hypothèse IA. Le consentement `--allow-upload` est obligatoire avant tout transfert de manuscrit via API ; ne jamais introduire clé, corpus privé ou rapport littéraire dans Git public. Les tests IA utilisent des doubles et ne prouvent pas l'exactitude d'une interprétation littéraire. Les vrais manuscrits ne doivent pas être corrigés automatiquement sur la seule base du rapport.

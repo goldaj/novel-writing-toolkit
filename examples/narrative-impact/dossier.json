@@ -1,0 +1,62 @@
+{
+  "format_version": 1,
+  "aliases": [
+    "Léo"
+  ],
+  "facts": [
+    {
+      "id": "taille",
+      "before": "petit",
+      "after": "grand"
+    },
+    {
+      "id": "constitution",
+      "before": "chétif",
+      "after": "chétif"
+    },
+    {
+      "id": "yeux",
+      "before": "verts",
+      "after": "bleus"
+    }
+  ],
+  "rules": [
+    {
+      "id": "brimades",
+      "label": "Brimades scolaires",
+      "because_any": [
+        [
+          {
+            "fact": "taille",
+            "equals": "petit"
+          }
+        ],
+        [
+          {
+            "fact": "constitution",
+            "equals": "chétif"
+          }
+        ]
+      ],
+      "evidence_terms": [
+        "brimad",
+        "maltrait"
+      ]
+    },
+    {
+      "id": "fuite",
+      "label": "Fuite de Léo",
+      "because_any": [
+        [
+          {
+            "rule": "brimades"
+          }
+        ]
+      ],
+      "evidence_terms": [
+        "fui",
+        "fuir"
+      ]
+    }
+  ]
+}
