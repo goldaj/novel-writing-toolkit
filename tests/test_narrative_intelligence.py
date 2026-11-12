@@ -147,6 +147,14 @@ class NarrativeIntelligenceTests(unittest.TestCase):
         report = memory_engine.audit(self.old, revised)
         self.assertTrue(any(i["code"] == "stale_source" for i in report["issues"]))
 
+    def test_unverifiable_source_does_not_count_as_supported_causality(self):
+        revised = copy.deepcopy(self.old_memory)
+        revised["facts"][0]["source"]["quote"] = "Citation perdue du manuscrit."
+        report = memory_engine.audit(self.old, revised)
+        self.assertIn("stale_source", [i["code"] for i in report["issues"]])
+        self.assertEqual(report["causal_support"]["e2"]["state"], "uncertain")
+        self.assertEqual(report["causal_support"]["e3"]["state"], "uncertain")
+
     def test_reject_unknown_references_unsafe_sources_and_cycles(self):
         revised = copy.deepcopy(self.old_memory)
         revised["dependencies"][0]["because_any"] = [["fact:does_not_exist"]]
