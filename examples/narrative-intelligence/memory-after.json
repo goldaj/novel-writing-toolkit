@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "project": "Le Pont des Brumes (fiction)",
+  "characters": [
+    {
+      "id": "mira",
+      "name": "Mira",
+      "aliases": [
+        "La navigatrice"
+      ]
+    },
+    {
+      "id": "noa",
+      "name": "Noa",
+      "aliases": []
+    }
+  ],
+  "events": [
+    {
+      "id": "e1",
+      "label": "La carte est détruite",
+      "time_index": 1,
+      "precedes": [
+        "e2"
+      ],
+      "participants": [
+        "mira"
+      ],
+      "source": {
+        "chapter": "sections/chapter_01.txt",
+        "quote": "Mira brûle la carte."
+      }
+    },
+    {
+      "id": "e2",
+      "label": "Mira traverse le pont",
+      "time_index": 2,
+      "precedes": [
+        "e3"
+      ],
+      "participants": [
+        "mira"
+      ],
+      "requires_knowledge": [
+        {
+          "character": "mira",
+          "fact": "map"
+        }
+      ],
+      "source": {
+        "chapter": "sections/chapter_02.txt",
+        "quote": "Mira traverse le pont."
+      }
+    },
+    {
+      "id": "e3",
+      "label": "Noa attend Mira",
+      "time_index": 3,
+      "participants": [
+        "mira",
+        "noa"
+      ],
+      "source": {
+        "chapter": "sections/chapter_03.txt",
+        "quote": "Noa attend Mira derrière le pont."
+      }
+    }
+  ],
+  "facts": [
+    {
+      "id": "map",
+      "subject": "world",
+      "attribute": "map_status",
+      "value": "destroyed",
+      "from_event": "e1",
+      "confidence": "confirmed",
+      "source": {
+        "chapter": "sections/chapter_01.txt",
+        "quote": "Mira brûle la carte."
+      }
+    },
+    {
+      "id": "rope",
+      "subject": "world",
+      "attribute": "rope_status",
+      "value": "absent",
+      "confidence": "confirmed",
+      "source": {
+        "chapter": "sections/chapter_02.txt",
+        "quote": "Une corde pend près de l'eau."
+      }
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "k_map",
+      "character": "mira",
+      "fact": "map",
+      "state": "knows",
+      "since_event": "e1",
+      "source": {
+        "chapter": "sections/chapter_01.txt",
+        "quote": "Mira brûle la carte."
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "d_bridge",
+      "effect_event": "e2",
+      "because_any": [
+        [
+          "fact:map=usable"
+        ],
+        [
+          "fact:rope=ready"
+        ]
+      ],
+      "source": {
+        "chapter": "sections/chapter_02.txt",
+        "quote": "Mira traverse le pont."
+      }
+    },
+    {
+      "id": "d_arrival",
+      "effect_event": "e3",
+      "because_any": [
+        [
+          "event:e2"
+        ]
+      ],
+      "source": {
+        "chapter": "sections/chapter_03.txt",
+        "quote": "Noa attend Mira derrière le pont."
+      }
+    }
+  ]
+}

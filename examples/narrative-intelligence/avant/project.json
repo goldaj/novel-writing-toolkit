@@ -1,0 +1,18 @@
+{
+  "format_version": 1,
+  "title": "Le Pont des Brumes (fiction)",
+  "sections": [
+    {
+      "file": "sections/chapter_01.txt",
+      "heading": "Chapitre 1"
+    },
+    {
+      "file": "sections/chapter_02.txt",
+      "heading": "Chapitre 2"
+    },
+    {
+      "file": "sections/chapter_03.txt",
+      "heading": "Chapitre 3"
+    }
+  ]
+}
