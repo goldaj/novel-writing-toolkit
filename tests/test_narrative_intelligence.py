@@ -220,6 +220,14 @@ class NarrativeIntelligenceTests(unittest.TestCase):
         report = memory_engine.audit(self.old, revised)
         self.assertEqual(report["causal_support"]["e2"]["state"], "uncertain")
 
+    def test_transitive_timeline_contradiction_via_undated_event(self):
+        revised = copy.deepcopy(self.old_memory)
+        revised["events"][0]["time_index"] = 4
+        revised["events"][1]["time_index"] = None
+        revised["events"][2]["time_index"] = 3
+        with self.assertRaises(ProjectError):
+            memory_engine.audit(self.old, revised)
+
     def test_html_escapes_personal_text_and_is_standalone(self):
         revised = copy.deepcopy(self.old_memory)
         revised["characters"][0]["name"] = "<img src=x onerror=alert(1)>"
