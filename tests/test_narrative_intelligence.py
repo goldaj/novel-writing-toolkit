@@ -157,6 +157,7 @@ class NarrativeIntelligenceTests(unittest.TestCase):
         with self.assertRaises(ProjectError):
             memory_engine.audit(self.old, revised)
         revised = copy.deepcopy(self.old_memory)
+        revised["dependencies"][0]["because_any"][0].append("event:e1")
         revised["dependencies"].append({
             "id": "cycle", "effect_event": "e1",
             "because_any": [["event:e3"]],
@@ -164,6 +165,22 @@ class NarrativeIntelligenceTests(unittest.TestCase):
         })
         with self.assertRaises(ProjectError):
             memory_engine.audit(self.old, revised)
+
+    def test_partial_order_precedes_even_when_event_time_is_unknown(self):
+        revised = copy.deepcopy(self.old_memory)
+        revised["events"][0]["time_index"] = None
+        report = memory_engine.audit(self.old, revised)
+        ordered = [item["id"] for item in report["timeline"]]
+        self.assertLess(ordered.index("e1"), ordered.index("e2"))
+
+    def test_public_demo_is_complete_and_reproducible(self):
+        examples = Path(__file__).resolve().parents[1] / "examples" / "narrative-intelligence"
+        before = memory_engine.read_memory(examples / "memory-before.json")
+        after = memory_engine.read_memory(examples / "memory-after.json")
+        report = memory_engine.compare(examples / "avant", examples / "apres", before, after)
+        by_event = {item["event"]: item for item in report["consequences"]}
+        self.assertEqual(by_event["e3"]["status"], "declared_support_lost")
+        self.assertGreater(report["changed_blocks"], 0)
 
     def test_html_escapes_personal_text_and_is_standalone(self):
         revised = copy.deepcopy(self.old_memory)
