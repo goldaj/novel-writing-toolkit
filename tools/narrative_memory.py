@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections import defaultdict, deque
 from pathlib import Path
+import heapq
 import json
 import re
 
@@ -211,15 +212,19 @@ def _toposort(nodes: dict, edges: dict, label: str) -> list[str]:
     for children in edges.values():
         for dst in children:
             indegree[dst] += 1
-    queue = deque(sorted(k for k, v in indegree.items() if v == 0))
+    def ordering(ident):
+        time = nodes[ident].get("time_index")
+        return (time is None, 0 if time is None else time, ident)
+    queue = [(ordering(k), k) for k, v in indegree.items() if v == 0]
+    heapq.heapify(queue)
     ordered = []
     while queue:
-        item = queue.popleft()
+        _priority, item = heapq.heappop(queue)
         ordered.append(item)
-        for dest in sorted(edges[item]):
+        for dest in edges[item]:
             indegree[dest] -= 1
             if indegree[dest] == 0:
-                queue.append(dest)
+                heapq.heappush(queue, (ordering(dest), dest))
     if len(ordered) != len(nodes):
         raise ProjectError("Cycle in " + label + " graph")
     return ordered
@@ -364,10 +369,7 @@ def support_for(view: dict) -> dict[str, dict]:
 
 def audit(project: Path, memory: dict) -> dict:
     view = validate(project, memory)
-    events = sorted(view["events"].values(), key=lambda e: (
-        e.get("time_index") is None,
-        e.get("time_index") if e.get("time_index") is not None else 0,
-        e["id"]))
+    events = [view["events"][ident] for ident in view["chronological_topology"]]
     timeline = [{"id": e["id"], "label": e["label"],
                  "time_index": e.get("time_index"), "source": e["source"],
                  "participants": e.get("participants", [])} for e in events]
