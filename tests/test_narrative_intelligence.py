@@ -190,6 +190,36 @@ class NarrativeIntelligenceTests(unittest.TestCase):
         self.assertEqual(by_event["e3"]["status"], "declared_support_lost")
         self.assertGreater(report["changed_blocks"], 0)
 
+    def test_tentative_facts_cannot_certify_a_causal_justification(self):
+        revised = copy.deepcopy(self.old_memory)
+        revised["facts"][0]["confidence"] = "tentative"
+        support = memory_engine.audit(self.old, revised)["causal_support"]
+        self.assertEqual(support["e2"]["state"], "uncertain")
+        self.assertEqual(support["e3"]["state"], "uncertain")
+
+    def test_belief_is_not_knowledge_unless_explicitly_requested(self):
+        revised = copy.deepcopy(self.old_memory)
+        revised["dependencies"][0]["because_any"] = [["knowledge:k_map"]]
+        revised["knowledge"][0]["state"] = "believes"
+        first = memory_engine.audit(self.old, revised)
+        self.assertEqual(first["causal_support"]["e2"]["state"], "unsupported")
+        self.assertIn("knowledge_not_documented", [i["code"] for i in first["issues"]])
+        revised["dependencies"][0]["because_any"] = [["knowledge:k_map=believes"]]
+        second = memory_engine.audit(self.old, revised)
+        self.assertEqual(second["causal_support"]["e2"]["state"], "supported")
+
+    def test_explicit_precedes_resolves_undated_causal_relation(self):
+        revised = copy.deepcopy(self.old_memory)
+        for event in revised["events"]:
+            event["time_index"] = None
+        report = memory_engine.audit(self.old, revised)
+        self.assertEqual(report["causal_support"]["e2"]["state"], "supported")
+        self.assertEqual(report["causal_support"]["e3"]["state"], "supported")
+        self.assertIn("partial_chronology", [issue["code"] for issue in report["issues"]])
+        revised["events"][0]["precedes"] = []
+        report = memory_engine.audit(self.old, revised)
+        self.assertEqual(report["causal_support"]["e2"]["state"], "uncertain")
+
     def test_html_escapes_personal_text_and_is_standalone(self):
         revised = copy.deepcopy(self.old_memory)
         revised["characters"][0]["name"] = "<img src=x onerror=alert(1)>"
