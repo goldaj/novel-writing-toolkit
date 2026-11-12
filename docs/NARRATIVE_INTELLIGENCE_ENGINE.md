@@ -95,3 +95,18 @@ L'HTML/JSON peut contenir des citations privées : conserver les sorties hors de
 - Mesure de précision, rappel, coût et temps de relecture ; scénarios sur manuscrits longs et régressions de performance.
 
 Lire également docs/NARRATIVE_IMPACT.md et docs/LOCAL_NARRATIVE_AI_RESEARCH.md. Les anciens travaux et formats ne sont ni effacés ni invalidés.
+
+
+## Import des bibles historiques (nouveauté intégrée)
+
+Le convertisseur tools/import_legacy_narrative.py accepte une mémoire d'événements historique, un fichier de connaissances facultatif et un fichier de relations facultatif. Il fonctionne uniquement avec des fichiers locaux, sous le contrôle de leur propriétaire :
+
+    python tools/import_legacy_narrative.py CHEMIN_DU_PROJET CHRONOLOGIE.json --knowledge CONNAISSANCES.json --relations RELATIONS.json --out MEMOIRE_PRIVEE.json
+
+Il identifie les citations par les chemins déclarés dans project.json, même si les archives utilisaient une racine de dépôt plus longue. Il crée des événements et des états épistémiques compatibles avec le moteur v1, puis vérifie le résultat.
+
+**Choix de sûreté** : une séquence de chapitre n'est pas un ordre chronologique fictionnel ; une note de connaissance historique n'est pas une preuve de vérité ; un identifiant de règle sans événement cible n'est pas une causalité fiable. Le convertisseur marque donc ces éléments comme non déterminés, conserve les règles anciennes dans legacy_unmapped_rules, et laisse leur qualification à l'auteur.
+
+Les sorties locales peuvent contenir des citations privées. Ne pas les versionner dans le dépôt public. Le test synthetic tests/test_import_legacy_narrative.py couvre migration, chemins, refus des sorties destructrices et absence d'inférence temporelle.
+
+**Contrat de preuve renforcé** : lorsqu'une citation source ne peut plus être retrouvée, tout soutien causal qui en dépend devient uncertain ; un extrait périmé ne peut pas servir à conclure supported.
