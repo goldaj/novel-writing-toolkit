@@ -113,11 +113,15 @@ def segments(project: Path, max_chars: int = 2800) -> list[dict]:
     for path, _heading in chapters:
         chapter = path.relative_to(project.resolve()).as_posix()
         raw = read_utf8(path)
-        # Split at paragraph boundaries, then at most MAX_CHARS per block.
-        paragraphs = [x.strip() for x in re.split(r"\n\s*\n", raw) if x.strip()]
+        # The first nonempty LINE is the heading. It need not be separated
+        # from the first story paragraph by a blank line.
+        lines = raw.splitlines()
+        start_line = next((i for i, line in enumerate(lines) if line.strip()), None)
+        if start_line is None:
+            continue
+        body = "\n".join(lines[start_line + 1:])
+        paragraphs = [x.strip() for x in re.split(r"\n\s*\n", body) if x.strip()]
         for idx, paragraph in enumerate(paragraphs, 1):
-            if idx == 1:  # expected heading is metadata, not a story event
-                continue
             for offset in range(0, len(paragraph), max_chars):
                 text = paragraph[offset:offset + max_chars]
                 if not text.strip():
