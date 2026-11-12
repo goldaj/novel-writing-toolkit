@@ -311,6 +311,8 @@ def support_for(view: dict) -> dict[str, dict]:
     in a compared version are false. Textual presence alone is not causality.
     """
     deps = defaultdict(list)
+    stale = {issue["item"] for issue in view["issues"]
+             if issue["code"] == "stale_source"}
     for ident, dep in view["dependencies"].items():
         deps[dep["effect_event"]].append((ident, dep))
     memo = {}
@@ -322,6 +324,8 @@ def support_for(view: dict) -> dict[str, dict]:
         if kind == "event":
             if target not in view["events"]:
                 return False
+            if "event:" + target in stale:
+                return None
             ancestor = view["events"][target].get("time_index")
             if ancestor is None or moment is None:
                 return None
@@ -330,9 +334,13 @@ def support_for(view: dict) -> dict[str, dict]:
             upstream = check(target)["state"]
             return {"supported": True, "unsupported": False, "uncertain": None}[upstream]
         if kind == "fact":
+            if "fact:" + target in stale:
+                return None
             if expected and view["facts"][target]["value"].casefold() != expected.casefold():
                 return False
             return active_at(view, view["facts"][target], "from_event", moment)
+        if "knowledge:" + target in stale:
+            return None
         return active_at(view, view["knowledge"][target], "since_event", moment)
 
     def check(event_id: str) -> dict:
@@ -344,6 +352,10 @@ def support_for(view: dict) -> dict[str, dict]:
         own = deps.get(event_id, [])
         statuses = []
         for ident, dep in own:
+            if "dependency:" + ident in stale:
+                statuses.append({"dependency": ident, "alternatives": ["uncertain"],
+                                 "state": "uncertain"})
+                continue
             alternatives = []
             for group in dep["because_any"]:
                 states = [token_state(token, view["events"][event_id].get("time_index"))
@@ -356,8 +368,9 @@ def support_for(view: dict) -> dict[str, dict]:
                              else "uncertain" if "uncertain" in alternatives
                              else "unsupported"})
         visiting.remove(event_id)
-        state = "unsupported" if any(s["state"] == "unsupported" for s in statuses) else (
-            "uncertain" if any(s["state"] == "uncertain" for s in statuses) else "supported")
+        state = "uncertain" if "event:" + event_id in stale else (
+            "unsupported" if any(s["state"] == "unsupported" for s in statuses) else (
+            "uncertain" if any(s["state"] == "uncertain" for s in statuses) else "supported"))
         memo[event_id] = {"state": state, "dependencies": statuses,
                           "declared": bool(statuses)}
         return memo[event_id]
