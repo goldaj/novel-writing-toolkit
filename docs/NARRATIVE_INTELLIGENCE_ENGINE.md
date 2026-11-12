@@ -110,3 +110,23 @@ Il identifie les citations par les chemins déclarés dans project.json, même s
 Les sorties locales peuvent contenir des citations privées. Ne pas les versionner dans le dépôt public. Le test synthetic tests/test_import_legacy_narrative.py couvre migration, chemins, refus des sorties destructrices et absence d'inférence temporelle.
 
 **Contrat de preuve renforcé** : lorsqu'une citation source ne peut plus être retrouvée, tout soutien causal qui en dépend devient uncertain ; un extrait périmé ne peut pas servir à conclure supported.
+
+## Validation humaine interactive et suivi de décisions
+
+Le rapport HTML propose un statut et une note par anomalie ou conséquence. Choix possibles : à examiner, problème confirmé, choix volontaire, faux positif, réécriture nécessaire. Cliquer sur « Exporter mes décisions (JSON) » crée localement narrative-decisions.json. Aucun compte, serveur ou transfert n'est nécessaire.
+
+Réexaminer après révision :
+
+    python tools/narrative_intelligence.py compare AVANT APRES MEMOIRE_AVANT.json MEMOIRE_APRES.json --review-decisions narrative-decisions.json --json-out rapport.json --html-out rapport.html
+
+Une décision porte une empreinte de l'élément examiné. Si les éléments de preuve changent, elle devient obsolète et l'auteur doit la réexaminer. Une décision ne supprime jamais de diagnostic. Les décisions sur des anomalies désormais absentes restent signalées dans review_warnings. Le JSON peut contenir des notes personnelles : le conserver en privé.
+
+## Importateur de mémoire historique
+
+    python tools/import_legacy_narrative.py PROJET_CHAPITRES chronologie.json --knowledge knowledge.json --relations relations.json --out dossier-prive/import.json
+
+L'importateur préserve les événements annotés, les citations, les notes de connaissance et les règles historiques. Il ne déduit pas les dates fictionnelles de l'ordre des fichiers. Un statut historique de connaissance inconnu devient un soupçon à qualifier plutôt qu'une vérité. Les règles sans événement destinataire certain sont préservées dans legacy_unmapped_rules, sans activation automatique. Il faut les rattacher explicitement aux événements pour bénéficier d'une propagation causale fiable.
+
+## Barrières de validation
+
+Une CI verte prouve la conformité aux scénarios automatisés, pas la cohérence complète d'un roman. La qualification réelle exige un contrôle éditorial des liens, temps, savoirs et faux positifs. Tous les contenus et rapports sur manuscrits privés restent hors du dépôt public.
