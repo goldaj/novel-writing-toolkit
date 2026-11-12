@@ -12,6 +12,7 @@ from pathlib import Path
 
 from manuscript_pipeline import ProjectError, load_project
 from narrative_memory import read_memory, audit, compare
+from narrative_reviews import attach, read_decisions
 
 
 def h(value: object) -> str:
@@ -23,9 +24,30 @@ def source_link(source: dict) -> str:
             " · « " + h(source.get("quote", "")[:240]) + " »</span>")
 
 
-def _card(title: str, body: str, key: str = "") -> str:
+def _review_controls(review: dict | None) -> str:
+    if not review:
+        return ""
+    statuses = [
+        ("open", "À examiner"), ("confirmed", "Problème confirmé"),
+        ("intentional", "Choix volontaire"), ("false_positive", "Faux positif"),
+        ("needs_rewrite", "Réécriture nécessaire")
+    ]
+    options = "".join("<option value='" + key + "'" +
+                      (" selected" if key == review["status"] else "") +
+                      ">" + h(label) + "</option>" for key, label in statuses)
+    stale = ("<p class='muted'>Le diagnostic a changé depuis la dernière revue. "
+             "Décision précédente non réutilisée.</p>" if review.get("stale") else "")
+    return ("<div class='review' data-review-id='" + h(review["id"]) +
+            "' data-fingerprint='" + h(review["fingerprint"]) + "'>" + stale +
+            "<label>Décision de l'auteur<select class='review-status'>" + options +
+            "</select></label><label>Justification / note<textarea class='review-note' "
+            "maxlength='2000' rows='2' placeholder='Observation, référence, intention…'>" +
+            h(review.get("note", "")) + "</textarea></label></div>")
+
+
+def _card(title: str, body: str, key: str = "", review: dict | None = None) -> str:
     return ("<article class='card' data-search='" + h(key) + "'><h3>" +
-            h(title) + "</h3>" + body + "</article>")
+            h(title) + "</h3>" + body + _review_controls(review) + "</article>")
 
 
 def _section(title: str, inner: str, ident: str) -> str:
@@ -67,7 +89,13 @@ def render_html(report: dict) -> str:
         "background:#f4f6fa;border-left:3px solid #99a9d2;white-space:pre-wrap}",
         "input[type=search]{width:100%;padding:.8rem 1rem;border:1px solid #b3bad0;border-radius:8px;"
         "font:inherit;background:white}a{color:#3653a3}footer{margin-top:3rem;color:var(--muted);"
-        "font-size:.9rem}@media print{header{background:white;color:black;padding:1rem 0}"
+        "font-size:.9rem}.review{border-top:1px solid var(--line);padding-top:.6rem;margin-top:.8rem}"
+        ".review label{display:block;font-size:.82rem;font-weight:600;margin-top:.6rem}"
+        ".review select,.review textarea{display:block;width:100%;font:inherit;font-size:.9rem;"
+        "padding:.5rem;border:1px solid #b3bad0;border-radius:6px;background:white}"
+        "button{background:#273d80;color:white;padding:.6rem 1rem;border:0;border-radius:7px;"
+        "cursor:pointer;font:inherit}button:hover{background:#3753aa}"
+        "@media print{header{background:white;color:black;padding:1rem 0}"
         "nav,input{display:none}main{padding:0}.card,details{break-inside:avoid}}",
         "</style></head><body><header><p>RAPPORT LOCAL · HORS LIGNE</p>",
         "<h1>Narrative Intelligence Engine</h1>",
@@ -84,7 +112,19 @@ def render_html(report: dict) -> str:
                   "<a href='#issues'>Vérifications</a>")
     if is_comparison:
         chunks.append("<a href='#impacts'>Révisions et impacts</a>")
-    chunks.append("</nav><label for='filter'>Filtrer les éléments du rapport</label>"
+    chunks.append("</nav>")
+    if report.get("review_summary"):
+        counts_review = report["review_summary"]
+        chunks.append("<p><strong>Revue éditoriale :</strong> " +
+                      str(counts_review["open"]) + " à examiner · " +
+                      str(sum(counts_review[k] for k in ("confirmed", "intentional",
+                                                        "false_positive", "needs_rewrite"))) +
+                      " décisions importées · " + str(counts_review["stale"]) +
+                      " décisions devenues obsolètes.</p>"
+                      "<button type='button' id='downloadReviews'>Exporter mes décisions (JSON)</button>"
+                      "<p class='muted'>Le rapport ne cache jamais les problèmes confirmés ou "
+                      "volontaires. Conservez le JSON téléchargé hors des dépôts publics.</p>")
+    chunks.append("<label for='filter'>Filtrer les éléments du rapport</label>"
                   "<input id='filter' type='search' placeholder='Personnage, fait, événement…' "
                   "aria-label='Filtrer les cartes'>")
     chronology = []
@@ -132,7 +172,7 @@ def render_html(report: dict) -> str:
             detail += "<p class='muted'>" + h(important) + "</p>"
         if issue.get("facts"):
             detail += "<p>Faits concernés : " + h(", ".join(issue["facts"])) + "</p>"
-        issues.append(_card(issue["code"], detail, str(issue)))
+        issues.append(_card(issue["code"], detail, str(issue), issue.get("review")))
     chunks.append(_section("Points à examiner (" + str(len(issues)) + ")",
                            "<div class='cards'>" + "".join(issues) + "</div>", "issues"))
     if is_comparison:
@@ -145,7 +185,8 @@ def render_html(report: dict) -> str:
             boxes.append(_card("Conséquence : " + impact["event"],
                                "<p>" + h(impact["before"]) + " → " + h(impact["after"]) +
                                "</p><p><strong>" + h(impact["status"]) + "</strong></p>" +
-                               "<p>" + source_link(impact["source"]) + "</p>", str(impact)))
+                               "<p>" + source_link(impact["source"]) + "</p>", str(impact),
+                               impact.get("review")))
         chunks.append(_section("Changements de mémoire et conséquences",
                                "<p>" + str(report["changed_blocks"]) +
                                " bloc(s) textuel(s) modifié(s) identifiés par le comparateur existant.</p>"
@@ -169,6 +210,20 @@ def render_html(report: dict) -> str:
                   "var q=this.value.toLocaleLowerCase('fr');"
                   "document.querySelectorAll('.card').forEach(function(card){"
                   "card.hidden=!card.textContent.toLocaleLowerCase('fr').includes(q);});});"
+                  "var exportButton=document.getElementById('downloadReviews');"
+                  "if(exportButton){exportButton.addEventListener('click',function(){"
+                  "var entries=[];"
+                  "document.querySelectorAll('[data-review-id]').forEach(function(control){"
+                  "var status=control.querySelector('.review-status').value;"
+                  "var note=control.querySelector('.review-note').value;"
+                  "if(status!=='open'||note.trim()){entries.push({id:control.dataset.reviewId,"
+                  "fingerprint:control.dataset.fingerprint,status:status,note:note});}});"
+                  "var blob=new Blob([JSON.stringify({format_version:1,items:entries},null,2)],"
+                  "{type:'application/json;charset=utf-8'});"
+                  "var url=URL.createObjectURL(blob);"
+                  "var link=document.createElement('a');link.href=url;"
+                  "link.download='narrative-decisions.json';link.click();"
+                  "setTimeout(function(){URL.revokeObjectURL(url)},1000);});}"
                   "</script></body></html>")
     return "\n".join(chunks)
 
@@ -228,6 +283,8 @@ def cli(argv: list[str] | None = None) -> int:
         subparser.add_argument("--json-out", type=Path)
         subparser.add_argument("--html-out", type=Path)
         subparser.add_argument("--force", action="store_true", help="Explicitly replace reports")
+        subparser.add_argument("--review-decisions", type=Path,
+                               help="Local JSON decisions from a prior HTML review")
     args = parser.parse_args(argv)
     try:
         if args.command == "audit":
@@ -238,6 +295,10 @@ def cli(argv: list[str] | None = None) -> int:
             memories = [args.before_memory, args.after_memory]
             report = compare(args.before_project, args.after_project,
                              read_memory(args.before_memory), read_memory(args.after_memory))
+        report = attach(report, read_decisions(args.review_decisions)
+                        if args.review_decisions else None)
+        if args.review_decisions:
+            memories = [*memories, args.review_decisions]
         write_outputs(report, args.json_out, args.html_out, projects, memories, args.force)
         if args.json_out is None and args.html_out is None:
             print(json.dumps(report, ensure_ascii=False, indent=2))
