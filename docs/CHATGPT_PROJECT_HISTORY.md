@@ -68,3 +68,9 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 - Utilisateur (résumé reconstruit, non verbatim) : demande un chantier de développement professionnel profond sur la mémoire narrative, avec réflexion de Product Owner et revue pluridisciplinaire.
 - Assistant (résumé non verbatim) : création d'un moteur déterministe et local de mémoire narrative, connaissances différenciées, faits temporels, causalité avec alternatives, propagation des révisions et rapports HTML/JSON. Travail isolé dans feat/narrative-intelligence-engine-v1-20261112. Les données et textes privés de Résurrectés ne sont pas intégrés au dépôt public.
 - Limites : extraction sémantique automatique et IA locale non livrées, validation sur un roman long à réaliser ; ne pas transformer les tests synthétiques en preuve de compréhension littéraire.
+
+## 2026-11-12 — Reprise, revue éditoriale et candidat d'annotation IA locale
+
+- Utilisateur (verbatim) : « T'as crash, reprends et continue jusqu'à terminer entièrement ».
+- Assistant (résumé reconstruit, non verbatim) : contrôle du code et des CI de la PR #6, renforcement de l'évaluation à trois états, gestion d'un ordre temporel partiel et contradictoire, ajout d'une boucle de revue avec notes exportables/réimportables et empreintes d'alerte. Ajout d'un extracteur facultatif via Ollama loopback, citations candidates vérifiées et tests simulés sans vrai manuscrit.
+- La qualification de l'adaptateur Résurrectés est traitée dans son dépôt privé et demeure distincte du succès des tests publics. Aucun texte du roman n'a été copié ici.
