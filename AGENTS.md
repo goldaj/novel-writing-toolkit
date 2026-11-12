@@ -43,3 +43,8 @@ Lire `docs/NARRATIVE_IMPACT.md`. L'objectif est la **cohérence causale**, pas u
 ## Étude IA locale et convertisseur de mémoire (2026-11-02)
 
 Lire `docs/LOCAL_NARRATIVE_AI_RESEARCH.md` avant d'ajouter une IA ou modifier `tools/chronology_to_dossier.py`. **Ollama + LangExtract est une hypothèse à benchmarker, pas une intégration livrée**. Distinguer mémoire déclarative v1, source textuelle, événements, connaissances individuelles et causalité. Les données privées de Résurrectés restent exclusivement dans son dépôt privé. Tester l'adaptateur avec `tests/test_chronology_to_dossier.py`, fichiers synthétiques seulement. Ne pas prétendre qu'une baseline avec valeurs `before=after` détecte les changements sémantiques. Aucune transmission réseau ou intégration de modèle sans accord du propriétaire.
+
+
+## Narrative Intelligence Engine (12 novembre 2026)
+
+Lire docs/NARRATIVE_INTELLIGENCE_ENGINE.md avant évolution. Les faits, connaissances et liens de causalité sont annotés et sourcés, pas inférés comme certitudes par proximité lexicale. Ne jamais confondre absence d'alerte et cohérence prouvée. Aucun texte ou mémoire de Résurrectés ne doit entrer dans ce dépôt public. Les exports d'analyse de livres réels restent hors de Git. Préserver les CLI historiques.

@@ -61,3 +61,10 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 **Utilisateur (verbatim, heure exacte non attestée)** : « 1/ rajoute toute cette analyse dans le projet de toolkit. 2/ Transforme l'étude narrative que t'as fait sur résurrectés pour qu'elle rentre dans le format attendu par le toolkit ».
 
 **Assistant (résumé reconstruit, non verbatim)** : documentation comparative de moteurs locaux et extraction sourcée, proposition Ollama + LangExtract à tester, ajout d'un adaptateur standard-library d'événements et liens causaux vers le format `dossier` existant. Aucune donnée du roman privé copiée dans ce dépôt. Résurrectés est converti et conservé dans son propre dépôt privé ; aucune IA locale intégrée lors de cette étape.
+
+
+## 2026-11-12 — Narrative Intelligence Engine v1
+
+- Utilisateur (résumé reconstruit, non verbatim) : demande un chantier de développement professionnel profond sur la mémoire narrative, avec réflexion de Product Owner et revue pluridisciplinaire.
+- Assistant (résumé non verbatim) : création d'un moteur déterministe et local de mémoire narrative, connaissances différenciées, faits temporels, causalité avec alternatives, propagation des révisions et rapports HTML/JSON. Travail isolé dans feat/narrative-intelligence-engine-v1-20261112. Les données et textes privés de Résurrectés ne sont pas intégrés au dépôt public.
+- Limites : extraction sémantique automatique et IA locale non livrées, validation sur un roman long à réaliser ; ne pas transformer les tests synthétiques en preuve de compréhension littéraire.
