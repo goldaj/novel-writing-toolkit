@@ -183,11 +183,16 @@ def validate(project: Path, memory: dict) -> dict:
     # A causal graph and chronological partial order must each be acyclic.
     chronology_edges = {eid: set(e.get("precedes", [])) for eid, e in events.items()}
     order = _toposort(events, chronology_edges, "chronological")
-    for src, children in chronology_edges.items():
-        for dst in children:
-            a, b = events[src].get("time_index"), events[dst].get("time_index")
-            if a is not None and b is not None and a >= b:
-                raise ProjectError("precedes contradicts time_index: " + src + " -> " + dst)
+    # Propagate the largest known ancestor time through undated intermediates.
+    # A -> unknown -> B is still contradictory if B precedes A numerically.
+    highest_ancestor_time = {eid: -1 for eid in events}
+    for src in order:
+        stamp = events[src].get("time_index")
+        if stamp is not None and stamp <= highest_ancestor_time[src]:
+            raise ProjectError("Chronology contradicts transitive precedes: " + src)
+        propagated = max(highest_ancestor_time[src], stamp if stamp is not None else -1)
+        for dst in chronology_edges[src]:
+            highest_ancestor_time[dst] = max(highest_ancestor_time[dst], propagated)
     causal_edges = {eid: set() for eid in events}
     for dep in dependencies.values():
         for group in dep["because_any"]:
