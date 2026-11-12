@@ -379,9 +379,7 @@ def support_for(view: dict) -> dict[str, dict]:
         deps[dep["effect_event"]].append((ident, dep))
     memo = {}
     visiting = set()
-    event_id_for_moment = [None]  # local to the one dependency currently evaluated
-
-    def token_state(token: str, moment: int | None) -> bool | None:
+    def token_state(token: str, moment: int | None, at_event: str) -> bool | None:
         kind, raw_target = token.split(":", 1)
         target, _delimiter, expected = raw_target.partition("=")
         if kind == "event":
@@ -389,10 +387,7 @@ def support_for(view: dict) -> dict[str, dict]:
                 return False
             if "event:" + target in stale:
                 return None
-            current_event = event_id_for_moment[0]
-            if current_event is None:
-                return None
-            ordered = event_precedes(view, target, current_event)
+            ordered = event_precedes(view, target, at_event)
             if ordered is not True:
                 return ordered
             upstream = check(target)["state"]
@@ -403,14 +398,14 @@ def support_for(view: dict) -> dict[str, dict]:
                 return None
             if expected and fact["value"].casefold() != expected.casefold():
                 return False
-            return active_at(view, fact, "from_event", moment, event_id_for_moment[0])
+            return active_at(view, fact, "from_event", moment, at_event)
         item = view["knowledge"][target]
         if "knowledge:" + target in stale:
             return None
         expected_state = expected or "knows"
         if item["state"] != expected_state:
             return False
-        return active_at(view, item, "since_event", moment, event_id_for_moment[0])
+        return active_at(view, item, "since_event", moment, at_event)
 
     def check(event_id: str) -> dict:
         if event_id in memo:
@@ -426,9 +421,8 @@ def support_for(view: dict) -> dict[str, dict]:
                                  "state": "uncertain"})
                 continue
             alternatives = []
-            event_id_for_moment[0] = event_id
             for group in dep["because_any"]:
-                states = [token_state(token, view["events"][event_id].get("time_index"))
+                states = [token_state(token, view["events"][event_id].get("time_index"), event_id)
                           for token in group]
                 alternatives.append("supported" if all(x is True for x in states)
                                     else "unsupported" if any(x is False for x in states)
