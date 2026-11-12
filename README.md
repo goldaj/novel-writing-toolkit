@@ -63,3 +63,7 @@ La nouvelle commande `python tools/manuscript_pipeline.py epub mon-roman --autho
 ## Narrative Intelligence Engine v1 (branche du 12 novembre 2026)
 
 Le moteur de mémoire sourcée permet d'examiner une chronologie hors ordre des chapitres, les savoirs individuels, les faits du monde et les conséquences causales transitives d'une révision. Rapports privés JSON/HTML, aucune API ni modification de texte. Démonstration fictive dans examples/narrative-intelligence. Lire docs/NARRATIVE_INTELLIGENCE_ENGINE.md. Aucune validation sémantique complète d'un roman réel n'est revendiquée.
+
+### Suggestions d'annotation assistées par modèle local (optionnelles)
+
+tools/narrative_local_assist.py propose des annotations littéraires à partir de paragraphes envoyés uniquement à un serveur Ollama local explicitement autorisé. Les citations candidates sont vérifiées dans les extraits réellement fournis, sans validation du sens. Aucun candidat n'est automatiquement accepté dans la mémoire. Guide : docs/NARRATIVE_INTELLIGENCE_ENGINE.md. Les tests utilisent des réponses simulées, pas un modèle réel.
