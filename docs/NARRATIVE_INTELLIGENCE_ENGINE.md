@@ -130,3 +130,17 @@ L'importateur préserve les événements annotés, les citations, les notes de c
 ## Barrières de validation
 
 Une CI verte prouve la conformité aux scénarios automatisés, pas la cohérence complète d'un roman. La qualification réelle exige un contrôle éditorial des liens, temps, savoirs et faux positifs. Tous les contenus et rapports sur manuscrits privés restent hors du dépôt public.
+
+## Assistance d'extraction par modèle local (expérimentale et facultative)
+
+Le script tools/narrative_local_assist.py peut proposer des candidats événementiels, faits, connaissances et liens causaux à partir des paragraphes d'un manuscrit **local**. Il est désactivé tant que l'utilisateur n'a pas ajouté l'option --allow-local-model. Il ne contacte que http://127.0.0.1:11434/api/generate et refuse les URLs distantes, redirections et proxies.
+
+Exemple avec Ollama installé et un modèle déjà téléchargé sur la machine :
+
+    python tools/narrative_local_assist.py MON_ROMAN --model NOM_DU_MODELE_LOCAL --allow-local-model --max-blocks 20 --out DOSSIER_PRIVE/candidats.json
+
+Le traitement est borné par défaut à 20 blocs de texte. Le rapport donne next_block et all_blocks : utiliser --start-block pour poursuivre sur d'autres blocs, sans recopier aveuglément le JSON dans la mémoire validée. Une citation doit être retrouvée dans le passage effectivement fourni au modèle, sinon la proposition est rejetée. Cela vérifie seulement la présence du texte, **pas** la vérité de l'interprétation.
+
+Chaque candidat a status=pending_author_review et trust=hypothesis. Les faits et liens suggérés doivent être acceptés, corrigés et datés par l'auteur avant de figurer dans la mémoire v1. Aucun ajout automatique de candidats au graphe causal. Le test automatisé simule un modèle ; **aucun Ollama réel, aucune performance sémantique ni précision sur roman complet n'ont été validés**.
+
+Les fichiers JSON de candidats contiennent des extraits du manuscrit et doivent rester privés. Le programme n'émet aucun passage dans les journaux. Un service local peut toutefois avoir sa propre configuration réseau : vérifier la politique du moteur installé avant de lui soumettre du contenu confidentiel. API utilisée : https://docs.ollama.com/api/generate.
