@@ -167,8 +167,12 @@ def validate(project: Path, memory: dict) -> dict:
                     raise ProjectError("Invalid dependency token in " + ident)
                 kind, raw_target = token.split(":", 1)
                 target, delimiter, expected = raw_target.partition("=")
-                if (delimiter and (kind != "fact" or not expected.strip())):
-                    raise ProjectError("Only facts may have a nonempty expected value")
+                if delimiter and not expected.strip():
+                    raise ProjectError("A dependency state/value must not be empty")
+                if delimiter and kind not in {"fact", "knowledge"}:
+                    raise ProjectError("Only facts and knowledge may have an expected value/state")
+                if kind == "knowledge" and delimiter and expected not in STATES:
+                    raise ProjectError("Invalid expected knowledge state: " + expected)
                 catalog = {"event": events, "fact": facts, "knowledge": knowledge}.get(kind)
                 if catalog is None or target not in catalog:
                     raise ProjectError("Unknown dependency token: " + token)
@@ -238,12 +242,70 @@ def interval(view: dict, item: dict, start_key: str) -> tuple[int | None, int | 
     return event_time(view, item.get(start_key)), event_time(view, item.get("until_event"))
 
 
-def active_at(view: dict, item: dict, start_key: str, moment: int | None) -> bool | None:
-    first, last = interval(view, item, start_key)
-    if moment is None or (item.get(start_key) and first is None) or (
-            item.get("until_event") and last is None):
+def event_precedes(view: dict, first: str, second: str) -> bool | None:
+    """Resolve narrative order from explicit timestamps or directed precedence.
+
+    None means incomparable, *not* simultaneous. Chronological ordering in a
+    report is never considered evidence that two events have a known order.
+    """
+    if first == second:
+        return False
+    a, b = event_time(view, first), event_time(view, second)
+    if a is not None and b is not None and a != b:
+        return a < b
+
+    def reaches(start: str, destination: str) -> bool:
+        stack = [start]
+        seen = set()
+        while stack:
+            current = stack.pop()
+            if current in seen:
+                continue
+            seen.add(current)
+            for successor in view["events"][current].get("precedes", []):
+                if successor == destination:
+                    return True
+                stack.append(successor)
+        return False
+
+    if reaches(first, second):
+        return True
+    if reaches(second, first):
+        return False
+    return None
+
+
+def active_at(view: dict, item: dict, start_key: str, moment: int | None,
+              at_event: str | None = None) -> bool | None:
+    """Three-valued validity at an event, including undated partial chronology."""
+    first_id, last_id = item.get(start_key), item.get("until_event")
+
+    def bound_on_or_before(bound_id: str | None) -> bool | None:
+        if bound_id is None:
+            return True
+        if at_event is not None:
+            if bound_id == at_event:
+                return True
+            order = event_precedes(view, bound_id, at_event)
+            if order is not None:
+                return order
+        bound_time = event_time(view, bound_id)
+        if bound_time is None or moment is None:
+            return None
+        return bound_time <= moment
+
+    began = bound_on_or_before(first_id)
+    if last_id is None:
+        ended = False
+    elif at_event == last_id:
+        ended = True
+    else:
+        ended = bound_on_or_before(last_id)
+    if began is False or ended is True:
+        return False
+    if began is None or ended is None:
         return None
-    return (first is None or moment >= first) and (last is None or moment < last)
+    return True
 
 
 def fact_conflicts(view: dict) -> list[dict]:
@@ -289,7 +351,7 @@ def knowledge_findings(view: dict) -> list[dict]:
             options = [k for k in view["knowledge"].values() if k["character"] == char
                        and k["fact"] == fact and k["state"] == "knows"]
             moment = event.get("time_index")
-            states = [active_at(view, k, "since_event", moment) for k in options]
+            states = [active_at(view, k, "since_event", moment, event_id) for k in options]
             if True in states:
                 continue
             if None in states or moment is None:
@@ -317,6 +379,7 @@ def support_for(view: dict) -> dict[str, dict]:
         deps[dep["effect_event"]].append((ident, dep))
     memo = {}
     visiting = set()
+    event_id_for_moment = [None]  # local to the one dependency currently evaluated
 
     def token_state(token: str, moment: int | None) -> bool | None:
         kind, raw_target = token.split(":", 1)
@@ -326,22 +389,28 @@ def support_for(view: dict) -> dict[str, dict]:
                 return False
             if "event:" + target in stale:
                 return None
-            ancestor = view["events"][target].get("time_index")
-            if ancestor is None or moment is None:
+            current_event = event_id_for_moment[0]
+            if current_event is None:
                 return None
-            if ancestor > moment:
-                return False
+            ordered = event_precedes(view, target, current_event)
+            if ordered is not True:
+                return ordered
             upstream = check(target)["state"]
             return {"supported": True, "unsupported": False, "uncertain": None}[upstream]
         if kind == "fact":
-            if "fact:" + target in stale:
+            fact = view["facts"][target]
+            if "fact:" + target in stale or fact.get("confidence", "confirmed") != "confirmed":
                 return None
-            if expected and view["facts"][target]["value"].casefold() != expected.casefold():
+            if expected and fact["value"].casefold() != expected.casefold():
                 return False
-            return active_at(view, view["facts"][target], "from_event", moment)
+            return active_at(view, fact, "from_event", moment, event_id_for_moment[0])
+        item = view["knowledge"][target]
         if "knowledge:" + target in stale:
             return None
-        return active_at(view, view["knowledge"][target], "since_event", moment)
+        expected_state = expected or "knows"
+        if item["state"] != expected_state:
+            return False
+        return active_at(view, item, "since_event", moment, event_id_for_moment[0])
 
     def check(event_id: str) -> dict:
         if event_id in memo:
@@ -357,6 +426,7 @@ def support_for(view: dict) -> dict[str, dict]:
                                  "state": "uncertain"})
                 continue
             alternatives = []
+            event_id_for_moment[0] = event_id
             for group in dep["because_any"]:
                 states = [token_state(token, view["events"][event_id].get("time_index"))
                           for token in group]
