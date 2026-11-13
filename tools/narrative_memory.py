@@ -444,7 +444,15 @@ def support_for(view: dict) -> dict[str, dict]:
                           "declared": bool(statuses)}
         return memo[event_id]
 
-    for event_id in view["events"]:
+    # Evaluate a topological order, so even thousands of chained events do not
+    # consume Python recursion depth. Every predecessor is memoized before use.
+    causal_edges = {eid: set() for eid in view["events"]}
+    for dep in view["dependencies"].values():
+        for group in dep["because_any"]:
+            for token in group:
+                if token.startswith("event:"):
+                    causal_edges[token.split(":", 1)[1]].add(dep["effect_event"])
+    for event_id in _toposort(view["events"], causal_edges, "causal"):
         check(event_id)
     return memo
 

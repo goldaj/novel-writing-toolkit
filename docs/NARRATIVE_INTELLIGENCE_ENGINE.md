@@ -144,3 +144,56 @@ Le traitement est borné par défaut à 20 blocs de texte. Le rapport donne next
 Chaque candidat a status=pending_author_review et trust=hypothesis. Les faits et liens suggérés doivent être acceptés, corrigés et datés par l'auteur avant de figurer dans la mémoire v1. Aucun ajout automatique de candidats au graphe causal. Le test automatisé simule un modèle ; **aucun Ollama réel, aucune performance sémantique ni précision sur roman complet n'ont été validés**.
 
 Les fichiers JSON de candidats contiennent des extraits du manuscrit et doivent rester privés. Le programme n'émet aucun passage dans les journaux. Un service local peut toutefois avoir sa propre configuration réseau : vérifier la politique du moteur installé avant de lui soumettre du contenu confidentiel. API utilisée : https://docs.ollama.com/api/generate.
+
+
+## Boucle complète validée par l'auteur : de l'extraction locale à la mémoire
+
+Le moteur dispose désormais de tools/narrative_curator.py. **Aucune suggestion de modèle n'est acceptée par défaut.** La provenance de chaque extrait candidat est reconstruite à partir du manuscrit courant, et un auteur doit fournir les champs structurés du schéma v1. C'est un contrôle de provenance et de forme, pas une garantie de justesse littéraire.
+
+### Étapes d'utilisation
+
+1. Sans IA : annoter directement la mémoire v1 (sections précédentes), puis lancer audit et compare. Tous les rapports restent locaux.
+2. Avec un modèle local installé et choisi consciemment, créer des candidats dans un dossier privé :
+
+       python tools/narrative_local_assist.py MON_ROMAN --model NOM_DU_MODELE --allow-local-model --max-blocks 20 --out DOSSIER_PRIVE/candidats.json
+
+3. Préparer une feuille de décision, **toutes les suggestions étant ignorées au départ** :
+
+       python tools/narrative_curator.py template DOSSIER_PRIVE/candidats.json --out DOSSIER_PRIVE/decisions.json
+
+4. Éditer localement decisions.json. Pour une proposition précise, remplacer action=skip par action=accept et ajouter annotation, avec tous les champs narratifs. Exemple fictif pour un candidat de type fact :
+
+       {
+         "id": "C_IDENTIFIANT_REEL_DU_CANDIDAT",
+         "action": "accept",
+         "annotation": {
+           "id": "cle_trouvee",
+           "subject": "world",
+           "attribute": "etat_cle",
+           "value": "utilisable",
+           "from_event": "e1",
+           "confidence": "confirmed"
+         }
+       }
+
+   L'identifiant du candidat doit correspondre au fichier de propositions. Les événements, états de connaissance et relations causales utilisent leurs champs de mémoire v1, et les références croisées peuvent viser d'autres annotations acceptées lors de la même opération. Le champ source n'est jamais recopié à la main : il provient de la citation candidate revérifiée.
+
+5. Générer une **nouvelle mémoire** (l'ancienne n'est jamais écrasée) :
+
+       python tools/narrative_curator.py apply MON_ROMAN DOSSIER_PRIVE/memory.json DOSSIER_PRIVE/candidats.json DOSSIER_PRIVE/decisions.json --out DOSSIER_PRIVE/memory-reviewed.json
+
+6. Examiner le résultat et ses éventuelles alertes :
+
+       python tools/narrative_intelligence.py audit MON_ROMAN DOSSIER_PRIVE/memory-reviewed.json --html-out DOSSIER_PRIVE/audit-reviewed.html --json-out DOSSIER_PRIVE/audit-reviewed.json
+
+Les champs curation et curation_history précisent l'origine des propositions acceptées et conservent les identifiants. Si le texte ou la segmentation a changé depuis l'extraction, l'import est refusé pour les candidats concernés : **relancer l'extraction plutôt que réutiliser une citation périmée**. Un candidat rejeté ou ignoré ne modifie rien.
+
+Les décisions exportées par le HTML des alertes (narrative-decisions.json) constituent un autre circuit : elles servent à classer les anomalies après audit, pas à approuver les propositions du modèle. Ne pas confondre les deux formats de décision.
+
+### Conditions qualité d'un usage professionnel
+
+- **DoD fonctionnelle** : import sans acceptation impossible ; hash et citation vérifiés ; schéma causal validé ; ancien manuscrit et mémoire d'origine préservés ; comparaison et HTML/JSON accessibles hors ligne.
+- **DoD technique** : tests historiques et nouveaux scénarios de régression verts sur Python 3.10 et 3.12 ; exécution d'une chaîne causale dépassant 1 200 événements sans limite de récursion.
+- **Évaluation sémantique non réalisée** : tests IA avec modèle simulé seulement. Pour considérer l'extraction utile sur un manuscrit de production, mesurer précision des faits, rappel des événements importants, taux de propositions rejetées et durée de validation humaine sur un corpus privé validé par l'auteur.
+- **Risque de publication** : les fichiers de candidats, mémoires, décisions, rapports JSON/HTML et traces de modèles peuvent contenir des extraits d'un roman inédit. Les conserver hors de ce dépôt public et n'activer le modèle local qu'après contrôle de sa configuration réseau.
+- **Livraison et intégration** : le moteur est une base technique réutilisable ; il n'infère pas des motivations cachées ou des causalités jamais annotées et n'est pas certifié pour une révision automatique d'œuvres littéraires.

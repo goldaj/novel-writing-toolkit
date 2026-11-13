@@ -271,5 +271,30 @@ class NarrativeIntelligenceTests(unittest.TestCase):
         self.assertEqual(app.cli(["audit", str(self.old), str(src)]), 2)
 
 
+    def test_1200_event_dependency_chain_without_python_recursion_limit(self):
+        # A novel can contain more causal links than Python's usual call stack.
+        source = {"chapter": "sections/chapter_01.txt",
+                  "quote": "Mira trouve une carte."}
+        size = 1205
+        scenario = {
+            "schema_version": 1, "characters": [], "facts": [], "knowledge": [],
+            "events": [
+                {"id": "E" + str(i), "label": "Synthetic event " + str(i),
+                 "time_index": i, "source": source}
+                for i in range(size)
+            ],
+            "dependencies": [
+                {"id": "D" + str(i), "effect_event": "E" + str(i),
+                 "because_any": [["event:E" + str(i - 1)]], "source": source}
+                for i in range(1, size)
+            ]
+        }
+        report = memory_engine.audit(self.old, scenario)
+        self.assertEqual(report["counts"]["events"], size)
+        self.assertEqual(report["causal_support"]["E1204"]["state"], "supported")
+
+
+
+
 if __name__ == "__main__":
     unittest.main()
