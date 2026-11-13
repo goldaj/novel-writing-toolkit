@@ -58,3 +58,12 @@ La nouvelle commande `python tools/manuscript_pipeline.py epub mon-roman --autho
 ## Vers une mémoire narrative construite par IA locale (novembre 2026)
 
 [Étude d'architecture et comparaison des solutions](docs/LOCAL_NARRATIVE_AI_RESEARCH.md) : Ollama + LangExtract privilégiés, LM Studio en alternative, modèles Gemma 4/Qwen 3.5/Ministral à évaluer, extraction sourcée et mémoire chronologique interchapitres. **Aucune IA locale n'est encore intégrée.** Le convertisseur hors ligne [chronology_to_dossier.py](tools/chronology_to_dossier.py) transforme une mémoire d'événements + relations annotées en dossier causal attendu par `narrative_impact.py`; tests synthétiques sans manuscrit privé.
+
+
+## Narrative Intelligence Engine v1 (branche du 12 novembre 2026)
+
+Le moteur de mémoire sourcée permet d'examiner une chronologie hors ordre des chapitres, les savoirs individuels, les faits du monde et les conséquences causales transitives d'une révision. Rapports privés JSON/HTML, aucune API ni modification de texte. Démonstration fictive dans examples/narrative-intelligence. Lire docs/NARRATIVE_INTELLIGENCE_ENGINE.md. Aucune validation sémantique complète d'un roman réel n'est revendiquée.
+
+### Suggestions d'annotation assistées par modèle local (optionnelles)
+
+tools/narrative_local_assist.py propose des annotations littéraires à partir de paragraphes envoyés uniquement à un serveur Ollama local explicitement autorisé. Les citations candidates sont vérifiées dans les extraits réellement fournis, sans validation du sens. Aucun candidat n'est automatiquement accepté dans la mémoire. Guide : docs/NARRATIVE_INTELLIGENCE_ENGINE.md. Les tests utilisent des réponses simulées, pas un modèle réel.
