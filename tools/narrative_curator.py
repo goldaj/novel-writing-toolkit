@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import copy
-import hashlib
 import json
 import os
 import sys
@@ -17,10 +16,10 @@ import tempfile
 from pathlib import Path
 
 from manuscript_pipeline import ProjectError, load_project, read_utf8
-from narrative_memory import validate, source_issues
+from narrative_memory import validate
 from narrative_local_assist import segments
 
-CATEGORIES = {"event": "events", "fact": "facts",
+CATEGORIES = {"character": "characters", "event": "events", "fact": "facts",
               "knowledge": "knowledge", "causal_link": "dependencies"}
 MAX_CANDIDATES = 20000
 
@@ -141,8 +140,7 @@ def promote(project: Path, baseline: dict, batch: dict, decisions: dict) -> tupl
     result = copy.deepcopy(baseline)
     for key in CATEGORIES.values():
         result.setdefault(key, [])
-    # IDs are unique per category as checked by validate(); cross-category IDs
-    # may share names, because references always name their category.
+    # IDs are unique per category, and cross-category references name the kind.
     counts = {kind: 0 for kind in CATEGORIES}
     accepted_ids = []
     for candidate, annotation in selected:
