@@ -74,3 +74,11 @@ Les conversations du roman et les textes littéraires privés ne doivent PAS êt
 - Utilisateur (verbatim) : « T'as crash, reprends et continue jusqu'à terminer entièrement ».
 - Assistant (résumé reconstruit, non verbatim) : contrôle du code et des CI de la PR #6, renforcement de l'évaluation à trois états, gestion d'un ordre temporel partiel et contradictoire, ajout d'une boucle de revue avec notes exportables/réimportables et empreintes d'alerte. Ajout d'un extracteur facultatif via Ollama loopback, citations candidates vérifiées et tests simulés sans vrai manuscrit.
 - La qualification de l'adaptateur Résurrectés est traitée dans son dépôt privé et demeure distincte du succès des tests publics. Aucun texte du roman n'a été copié ici.
+
+
+## 2026-11-13 — Finalisation du workflow de mémoire assistée
+
+- Utilisateur (verbatim, heure non vérifiable) : « T'as crash, reprends. »
+- Assistant (résumé reconstruit, non verbatim) : reprise de la branche de Narrative Intelligence, contrôle des CI et ajout du circuit human-in-the-loop tools/narrative_curator.py. Les propositions d'un modèle local sont refusées par défaut, leur bloc source et sa citation sont revérifiés, puis seules les annotations structurées explicitement approuvées sont ajoutées dans une nouvelle mémoire ; personnages, faits, connaissances et relations causales sont pris en charge.
+- Robustesse : calcul des relations en ordre topologique pour supporter plus de 1200 événements liés sans récursion profonde, tests de non-écrasement et traçabilité, documentation de démarrage complète. Le modèle local est testé avec simulateurs uniquement : aucune précision éditoriale sur œuvre réelle ni modèle Ollama réel n'est revendiquée.
+- État Git : la PR #6 avait déjà été fusionnée en main le 13 novembre 2026 vers 05:12 UTC, avant ces nouveaux correctifs. Les changements post-fusion doivent être intégrés dans une nouvelle PR basée sur la version courante de main, sans forcer ni réécrire l'historique.
