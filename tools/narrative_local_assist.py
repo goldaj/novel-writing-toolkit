@@ -198,6 +198,7 @@ def extract(project: Path, model: str, endpoint: str, start: int = 0,
         "model": model, "notice": "Quotes were located in the submitted local blocks, "
                 "but narrative claims, chronology and causality remain unverified.",
         "processed_blocks": len(chosen), "all_blocks": len(blocks),
+        "max_chars": max_chars,
         "start_block": start, "next_block": start + len(chosen),
         "truncated": start + len(chosen) < len(blocks),
         "rejected_claims": rejected, "candidates": proposed
