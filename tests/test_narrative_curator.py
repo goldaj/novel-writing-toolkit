@@ -31,7 +31,7 @@ class NarrativeCurationTests(unittest.TestCase):
         }), encoding="utf-8")
         self.before = {
             "schema_version": 1, "project": "Un essai purement fictif",
-            "characters": [{"id": "mira", "name": "Mira"}],
+            "characters": [],
             "events": [
                 {"id": "E1", "label": "Trouver la clé", "time_index": 1,
                  "precedes": ["E2"], "source": {"chapter": "sections/chapter_01.txt",
@@ -45,6 +45,8 @@ class NarrativeCurationTests(unittest.TestCase):
         def local_stub(_model, text, _endpoint, _timeout):
             if "trouve une clé" in text:
                 return {"claims": [
+                    {"kind": "character", "subject": "Mira", "statement": "Mira est mentionnée",
+                     "quote": "Mira trouve une clé."},
                     {"kind": "fact", "subject": "clé", "statement": "La clé est utilisable",
                      "quote": "Mira trouve une clé."},
                     {"kind": "knowledge", "subject": "Mira",
@@ -61,6 +63,7 @@ class NarrativeCurationTests(unittest.TestCase):
             query=local_stub)
         self.kind_ids = {item["kind"]: item["id"] for item in self.batch["candidates"]}
         self.accept = {
+            "character": {"id": "mira", "name": "Mira"},
             "fact": {"id": "key", "subject": "world",
                      "attribute": "key_status", "value": "usable", "from_event": "E1"},
             "knowledge": {"id": "K1", "character": "mira", "fact": "key",
@@ -76,7 +79,7 @@ class NarrativeCurationTests(unittest.TestCase):
 
     def test_default_deny_template_does_not_promote_any_claim(self):
         raw = curator.template(self.batch)
-        self.assertEqual([x["action"] for x in raw["items"]], ["skip"] * 3)
+        self.assertEqual([x["action"] for x in raw["items"]], ["skip"] * 4)
         result, stats = curator.promote(self.project, self.before, self.batch, raw)
         self.assertEqual(stats["accepted"], 0)
         self.assertEqual(len(result["dependencies"]), 0)
@@ -87,7 +90,8 @@ class NarrativeCurationTests(unittest.TestCase):
         original = copy.deepcopy(self.before)
         result, stats = curator.promote(self.project, self.before,
                                         self.batch, self.decisions)
-        self.assertEqual(stats["accepted"], 3)
+        self.assertEqual(stats["accepted"], 4)
+        self.assertEqual(result["characters"][0]["id"], "mira")
         self.assertEqual(result["facts"][0]["id"], "key")
         self.assertEqual(result["knowledge"][0]["state"], "knows")
         self.assertEqual(result["dependencies"][0]["because_any"],
@@ -97,6 +101,22 @@ class NarrativeCurationTests(unittest.TestCase):
         report = memory.audit(self.project, result)
         self.assertEqual(report["causal_support"]["E2"]["state"], "supported")
         self.assertEqual(self.before, original)
+
+    def test_custom_chunk_size_keeps_traceable_provenance(self):
+        def stub(_model, paragraph, _endpoint, _timeout):
+            return {"claims": [{"kind": "character", "subject": "Mira",
+                                "statement": "Mira apparaît", "quote": "Mira trouve une clé."}]
+                    } if "trouve" in paragraph else {"claims": []}
+        batch = assist.extract(self.project, "local-fiction",
+                               "http://127.0.0.1:11434/api/generate",
+                               max_chars=600, query=stub)
+        self.assertEqual(batch["max_chars"], 600)
+        decisions = {"format_version": 1, "items": [
+            {"id": batch["candidates"][0]["id"], "action": "accept",
+             "annotation": {"id": "mira", "name": "Mira"}}]}
+        result, stats = curator.promote(self.project, self.before, batch, decisions)
+        self.assertEqual(stats["accepted"], 1)
+        self.assertEqual(result["characters"][0]["name"], "Mira")
 
     def test_tampered_block_hash_and_stale_manuscript_are_rejected(self):
         broken = copy.deepcopy(self.batch)
