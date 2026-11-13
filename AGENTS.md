@@ -52,3 +52,8 @@ Lire docs/NARRATIVE_INTELLIGENCE_ENGINE.md avant évolution. Les faits, connaiss
 ## Extraction locale non autoritative
 
 L'extracteur facultatif tools/narrative_local_assist.py ne doit jamais transmettre de manuscrit à un fournisseur distant, même en cas de redirection. Conserver l'autorisation explicite --allow-local-model et le refus de toute URL autre que loopback. Il n'alimente pas automatiquement la mémoire validée : toute proposition doit être sourcée et revue par l'auteur. Ne pas prétendre qu'un test simulé vaut test sur Ollama réel.
+
+
+## Curation human-in-the-loop (2026-11-13)
+
+L'extraction locale ne constitue JAMAIS une insertion automatique : toute annotation acceptée doit passer par tools/narrative_curator.py avec une décision explicite, la source reconnue et la validation complète de narrative_memory.py. Par défaut, toutes les suggestions sont ignorées. Ne pas écraser la mémoire de l'auteur, le manuscrit ou un rapport existant sans demande explicite. Respecter les bornes des documents et reconstruire le SHA du bloc d'origine pour les nouveaux candidats. Les décisions de classement d'alertes et les décisions d'acceptation des propositions IA sont deux formats différents.

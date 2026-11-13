@@ -67,3 +67,8 @@ Le moteur de mémoire sourcée permet d'examiner une chronologie hors ordre des 
 ### Suggestions d'annotation assistées par modèle local (optionnelles)
 
 tools/narrative_local_assist.py propose des annotations littéraires à partir de paragraphes envoyés uniquement à un serveur Ollama local explicitement autorisé. Les citations candidates sont vérifiées dans les extraits réellement fournis, sans validation du sens. Aucun candidat n'est automatiquement accepté dans la mémoire. Guide : docs/NARRATIVE_INTELLIGENCE_ENGINE.md. Les tests utilisent des réponses simulées, pas un modèle réel.
+
+
+### Parcours complet, propositions contrôlées et validation humaine (13 novembre 2026)
+
+Le parcours produit est désormais **extraction locale facultative → feuille de décisions refusée par défaut → annotations structurées validées par l'auteur → mémoire v1 contrôlée → audit HTML/JSON et analyse d'impact**. Les outils sont tools/narrative_local_assist.py, tools/narrative_curator.py et tools/narrative_intelligence.py. Voir les commandes et barrières de confidentialité dans docs/NARRATIVE_INTELLIGENCE_ENGINE.md. Les personnages peuvent eux aussi être proposés et validés. Tests GitHub Actions sur Python 3.10 et 3.12 ; les qualités de raisonnement littéraire d'un modèle réel ne sont pas certifiées.
